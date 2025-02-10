@@ -1,5 +1,6 @@
 -- Minecraft Big Reactors Reactor
--- Lowers control rods to the current reactor energy buffer level. Simple control mechanism.
+-- Base idea is to lower control rods to the current reactor energy buffer level as way of a simple control mechanism.
+-- Being expanded upon since then
 
 local reactor
 reactor = peripheral.wrap("back")
