@@ -14,15 +14,15 @@ while true do
     rodlevel = 100
     lastlevel = 100
 
-    if percentenergy < 5 then
+    if percentenergy <= 50 then
         reactor.setAllControlRodLevels(0)
-        print("Energy level low, retracting control rods!")
+        print("Energy level below 50%, control rods fully retracted")
         sleep(2)
-    elseif percentenergy >= 5 and percentenergy < 95 then
+    elseif percentenergy > 50 and percentenergy <= 90 then
         print("Normal operation. Control rods at energy level")
         reactor.setAllControlRodLevels(percentenergy)
         sleep(5)
-    elseif percentenergy >= 96 then
+    elseif percentenergy > 90 then
         reactor.setAllControlRodLevels(100)
         print("Energy level high. Control rods fully inserted")
         sleep(20)
