@@ -12,7 +12,10 @@ while true do
     percentenergy = math.ceil(storedenergy / 100000)
 
     print("Reactor has " .. storedenergy .. " RF")
-    print("That is " .. percentenergy.. " % of total capacity")
+    print("That is " .. percentenergy .. " % of total capacity")
+    print("Newlevel is " .. newlevel .. )
+    print("Lastlevel is " .. lastlevel .. )
+    print("Newlevel - lastlevel is " .. (newlevel - lastlevel))
 
     if (newlevel - lastlevel) < -5 then
         reactor.setAllControlRodLevels(0)
