@@ -4,6 +4,8 @@
 
 local reactor
 reactor = peripheral.wrap("back")
+newlevel = 100
+lastlevel = 100
 
 while true do
     storedenergy = reactor.getEnergyStored()
@@ -11,10 +13,12 @@ while true do
 
     print("Reactor has " .. storedenergy .. " RF")
     print("That is " .. percentenergy.. " % of total capacity")
-    rodlevel = 100
-    lastlevel = 100
 
-    if percentenergy <= 50 then
+    if rodlevel - lastlevel < -5 then
+        reactor.setAllControlRodLevels(0)
+        print("Energy level dropping quick, control rods fully retracted")
+
+    elseif percentenergy <= 50 then
         reactor.setAllControlRodLevels(0)
         print("Energy level below 50%, control rods fully retracted")
         sleep(2)
@@ -30,6 +34,9 @@ while true do
         print("No change in control rods")
         sleep(5)
     end
+
+    lastlevel = newlevel
+    newlevel = percentenergy
 
     print()
 
