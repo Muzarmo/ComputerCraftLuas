@@ -22,6 +22,7 @@ while true do
     if (newlevel - lastlevel) < -5 then
         reactor.setAllControlRodLevels(0)
         print("Energy level dropping quick, control rods fully retracted")
+        sleep(10)
 
     elseif percentenergy <= 50 then
         reactor.setAllControlRodLevels(0)
@@ -30,7 +31,7 @@ while true do
     elseif percentenergy > 50 and percentenergy <= 90 then
         print("Normal operation. Control rods at energy level")
         reactor.setAllControlRodLevels(percentenergy)
-        sleep(5)
+        sleep(10)
     elseif percentenergy > 90 then
         reactor.setAllControlRodLevels(100)
         print("Energy level high. Control rods fully inserted")
@@ -48,3 +49,7 @@ while true do
 
 
 end
+
+
+-- rod change behöver egentligen ngn mer långsiktig variabel att rätta sig efter, typ trend i tid snarare än iteration av if-loopen
+
