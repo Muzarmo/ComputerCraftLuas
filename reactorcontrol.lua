@@ -13,8 +13,8 @@ while true do
 
     print("Reactor has " .. storedenergy .. " RF")
     print("That is " .. percentenergy .. " % of total capacity")
-    print("Newlevel is " .. newlevel .. )
-    print("Lastlevel is " .. lastlevel .. )
+    print("Newlevel is " .. newlevel)
+    print("Lastlevel is " .. lastlevel)
     print("Newlevel - lastlevel is " .. (newlevel - lastlevel))
 
     if (newlevel - lastlevel) < -5 then
