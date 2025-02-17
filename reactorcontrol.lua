@@ -14,7 +14,7 @@ while true do
     print("Reactor has " .. storedenergy .. " RF")
     print("That is " .. percentenergy.. " % of total capacity")
 
-    if rodlevel - lastlevel < -5 then
+    if (rodlevel - lastlevel) < -5 then
         reactor.setAllControlRodLevels(0)
         print("Energy level dropping quick, control rods fully retracted")
 
