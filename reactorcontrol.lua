@@ -4,8 +4,10 @@
 
 local reactor
 reactor = peripheral.wrap("back")
-local newlevel = 100
-local lastlevel = 100
+storedenergy = reactor.getEnergyStored()
+percentenergy = math.ceil(storedenergy / 100000)
+local newlevel = percentenergy
+local lastlevel = percentenergy
 
 while true do
     storedenergy = reactor.getEnergyStored()
