@@ -2,17 +2,36 @@
 -- Base idea is to lower control rods to the current reactor energy buffer level as way of a simple control mechanism.
 -- Being expanded upon since then
 
-local reactor
-reactor = peripheral.wrap("back")
-storedenergy = reactor.getEnergyStored()
-percentenergy = math.ceil(storedenergy / 100000)
+local function calcTrend(energylevels, newlevel)
+    table.remove(energylevels, 1)
+    table.insert(energylevels, newlevel)
+
+    local sum = 0
+
+    for _, v in ipairs(energylevels) do
+        sum = sum + v
+    end
+
+    return sum / #energylevels
+end
+
+
+local energylevels = {100, 100, 100, 100, 100}
+
+local reactor = peripheral.wrap("back")
+local storedenergy = reactor.getEnergyStored()
+local percentenergy = math.ceil(storedenergy / 100000)
 local newlevel = percentenergy
 local lastlevel = percentenergy
+local trendvalue = percentenergy
 
 while true do
     storedenergy = reactor.getEnergyStored()
     percentenergy = math.ceil(storedenergy / 100000)
     newlevel = percentenergy
+
+    trendvalue = calcTrend(energylevels, newlevel)
+    print("Trendvalue is " .. trendvalue)
 
     print("Reactor has " .. storedenergy .. " RF")
     print("That is " .. percentenergy .. " % of total capacity")
@@ -47,10 +66,10 @@ while true do
 
     print()
 
-
-
 end
 
 
 -- rod change behöver egentligen ngn mer långsiktig variabel att rätta sig efter, typ trend i tid snarare än iteration av if-loopen
--- kanske medel av fem senaste ändringarna? kan man göra det i en array som lägger till en och sparkar ut en? Funktion för det? 
+-- blivit lite förvirrad vad det var jag ville med trendvalue egentligen. jag tror att jag tänkte mig att ha ett trendvalue som jämförde diffen på level-values
+-- - men det kanske är smartare att göra som chatgpt ville. eller på något annat sätt?
+
