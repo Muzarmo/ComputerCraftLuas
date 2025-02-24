@@ -24,6 +24,9 @@ local newlevel = percentenergy
 local lastlevel = percentenergy
 local trendvalue = percentenergy
 
+local highlevel = 85
+local midlevel = 50
+
 while true do
     storedenergy = reactor.getEnergyStored()
     percentenergy = math.ceil(storedenergy / 100000)
@@ -46,15 +49,15 @@ while true do
         reactor.setAllControlRodLevels(0)
         print("Energy is trending downwards. Control rods fully retracted")
 
-    elseif percentenergy <= 50 then
+    elseif percentenergy <= midlevel then
         reactor.setAllControlRodLevels(0)
         print("Energy level below 50%. Control rods fully retracted")
 
-    elseif percentenergy > 50 and percentenergy <= 95 then
+    elseif percentenergy > midlevel and percentenergy <= highlevel then
         print("Normal operation. Control rods at energy level")
         reactor.setAllControlRodLevels(percentenergy)
 
-    elseif percentenergy > 85 then
+    elseif percentenergy > highlevel then
         reactor.setAllControlRodLevels(100)
         print("Energy level high. Control rods fully inserted")
         sleep(10)
