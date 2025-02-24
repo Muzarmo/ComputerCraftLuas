@@ -54,7 +54,7 @@ while true do
         print("Normal operation. Control rods at energy level")
         reactor.setAllControlRodLevels(percentenergy)
 
-    elseif percentenergy > 95 then
+    elseif percentenergy > 85 then
         reactor.setAllControlRodLevels(100)
         print("Energy level high. Control rods fully inserted")
         sleep(10)
