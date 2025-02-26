@@ -41,17 +41,17 @@ while true do
     print("Lastlevel is " .. lastlevel)
     print("Leveldiff " .. leveldiff)
 
-    if leveldiff < -5 then
+    if percentenergy <= midlevel then
+        reactor.setAllControlRodLevels(0)
+        print("Energy level below 50%. Control rods fully retracted")
+
+    elseif leveldiff < -5 then
         reactor.setAllControlRodLevels(0)
         print("Energy level dropping quick. Control rods fully retracted")
 
     elseif trendvalue < -3 then
         reactor.setAllControlRodLevels(0)
         print("Energy is trending downwards. Control rods fully retracted")
-
-    elseif percentenergy <= midlevel then
-        reactor.setAllControlRodLevels(0)
-        print("Energy level below 50%. Control rods fully retracted")
 
     elseif percentenergy > midlevel and percentenergy <= highlevel then
         print("Normal operation. Control rods at energy level")
