@@ -18,6 +18,7 @@ end
 
 local energylevels = {0, 0, 0, 0, 0}
 local reactor = peripheral.wrap("back")
+local monitor = peripheral.wrap("top")
 local storedenergy = reactor.getEnergyStored()
 local percentenergy = math.ceil(storedenergy / 100000)
 local newlevel = percentenergy
@@ -28,6 +29,9 @@ local highlevel = 85
 local midlevel = 50
 
 while true do
+
+    monitor.clear()
+    monitor.setCursorPos(1,1)
     storedenergy = reactor.getEnergyStored()
     percentenergy = math.ceil(storedenergy / 100000)
     newlevel = percentenergy
@@ -40,6 +44,11 @@ while true do
     print("Newlevel is " .. newlevel)
     print("Lastlevel is " .. lastlevel)
     print("Leveldiff " .. leveldiff)
+    print("Leveldiff history:")
+
+    for i, v in ipairs(energylevels) do
+        print("[" .. i .. "] " .. v)
+    end
 
     if percentenergy <= midlevel then
         reactor.setAllControlRodLevels(0)
@@ -73,10 +82,3 @@ while true do
     print()
 
 end
-
-
--- rod change behöver egentligen ngn mer långsiktig variabel att rätta sig efter, typ trend i tid snarare än iteration av if-loopen
--- blivit lite förvirrad vad det var jag ville med trendvalue egentligen. jag tror att jag tänkte mig att ha ett trendvalue som jämförde diffen på level-values
--- - men det kanske är smartare att göra som chatgpt ville. eller på något annat sätt?
--- Nej, jag gör som jag ville och ser hur det faller ut.
-
