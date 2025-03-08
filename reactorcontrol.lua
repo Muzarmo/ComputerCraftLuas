@@ -39,7 +39,7 @@ while true do
     leveldiff = newlevel - lastlevel
     trendvalue = calcTrend(energylevels, leveldiff)
     print("Trendvalue is " .. trendvalue)
-    print("Reactor has " .. storedenergy .. " RF")
+    print("Reactor buffer is " .. storedenergy .. " RF")
     print("That is " .. percentenergy .. " % of total capacity")
     print("Newlevel is " .. newlevel)
     print("Lastlevel is " .. lastlevel)
@@ -52,23 +52,23 @@ while true do
 
     if percentenergy <= midlevel then
         reactor.setAllControlRodLevels(0)
-        print("Energy level below 50%. Control rods fully retracted")
+        print("Energy level below 50%.\nControl rods fully retracted")
 
     elseif leveldiff < -5 then
         reactor.setAllControlRodLevels(0)
-        print("Energy level dropping quick. Control rods fully retracted")
+        print("Energy level dropping quick.\nControl rods fully retracted")
 
     elseif trendvalue < -3 then
         reactor.setAllControlRodLevels(0)
-        print("Energy is trending downwards. Control rods fully retracted")
+        print("Energy is trending downwards.\nControl rods fully retracted")
 
     elseif percentenergy > midlevel and percentenergy <= highlevel then
-        print("Normal operation. Control rods at energy level")
+        print("Normal operation.\nControl rods at energy level")
         reactor.setAllControlRodLevels(percentenergy)
 
     elseif percentenergy > highlevel then
         reactor.setAllControlRodLevels(100)
-        print("Energy level high. Control rods fully inserted")
+        print("Energy level high.\nControl rods fully inserted")
         sleep(10)
 
     else
