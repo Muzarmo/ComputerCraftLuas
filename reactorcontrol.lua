@@ -95,7 +95,6 @@ while true do
     elseif percentenergy > highlevel then
         reactor.setAllControlRodLevels(100)
         print("Energy level high.\nControl rods fully inserted")
-        sleep(10)
 
     else
         print("No change in control rods")
