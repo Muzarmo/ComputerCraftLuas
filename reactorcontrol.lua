@@ -2,6 +2,22 @@
 -- Base idea is to lower control rods to the current reactor energy buffer level as way of a simple control mechanism.
 -- Being expanded upon since then
 
+local energylevels = {0, 0, 0, 0, 0}
+local reactor = peripheral.wrap("back")
+local monitor = peripheral.wrap("top")
+local storedenergy = reactor.getEnergyStored()
+local percentenergy = math.ceil(storedenergy / 100000)
+local newlevel = percentenergy
+local lastlevel = percentenergy
+local trendvalue = percentenergy
+
+local highlevel = 85
+local midlevel = 50
+
+local barHeight = 14
+local barX = 44
+local barY = 3
+
 local function calcTrend(energylevels, leveldiff)
     table.remove(energylevels, 1)
     table.insert(energylevels, leveldiff)
@@ -15,18 +31,28 @@ local function calcTrend(energylevels, leveldiff)
     return sum / #energylevels
 end
 
+local function drawVerticalBar(percent)
+    local filled = math.floor((percent / 100) * barHeight)
+    monitor.setCursorPos(barX, barY-1)
+    monitor.write("+-+")
+    for i = 1, barHeight do
+        monitor.setCursorPos(barX, barY + (barHeight-i))
+        if i <= filled then
+            monitor.setBackgroundColor(colors.black)
+            monitor.write("|")
+            monitor.setBackgroundColor(colors.purple)
+            monitor.write(" ")
+            monitor.setBackgroundColor(colors.black)
+            monitor.write("|")
+        else
+            monitor.setBackgroundColor(colors.black)
+            monitor.write("| |")
+        end
+    end
+    monitor.setCursorPos(barX, barY+barHeight)
+    monitor.write("+-+")
+end
 
-local energylevels = {0, 0, 0, 0, 0}
-local reactor = peripheral.wrap("back")
-local monitor = peripheral.wrap("top")
-local storedenergy = reactor.getEnergyStored()
-local percentenergy = math.ceil(storedenergy / 100000)
-local newlevel = percentenergy
-local lastlevel = percentenergy
-local trendvalue = percentenergy
-
-local highlevel = 85
-local midlevel = 50
 
 while true do
 
@@ -75,6 +101,8 @@ while true do
         print("No change in control rods")
 
     end
+
+    drawVerticalBar(percentenergy)
 
     sleep(10)
     lastlevel = newlevel
