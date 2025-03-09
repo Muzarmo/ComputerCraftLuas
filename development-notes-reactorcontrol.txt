@@ -1,0 +1,10 @@
+
+
+Mål:
+ - Göra en graf för ETT värde i reactorcontrol
+  - jag väljer buffer size
+  - måla denna till höger på skärmen
+
+Börjar med att göra skärmen lite ren på högersidan. Som det är nu så går några av textraderna över mitten på skärmen
+
+
