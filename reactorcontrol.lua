@@ -52,7 +52,7 @@ while true do
 
     if percentenergy <= midlevel then
         reactor.setAllControlRodLevels(0)
-        print("Energy level below 50%.\nControl rods fully retracted")
+        print("Energy level below 50%\nControl rods fully retracted")
 
     elseif leveldiff < -5 then
         reactor.setAllControlRodLevels(0)
