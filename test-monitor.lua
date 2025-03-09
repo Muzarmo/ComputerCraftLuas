@@ -1,24 +1,31 @@
-local barHeight = 10
+local barHeight = 14
 local textX = 1
-local barX = 45
-local barY = 2
+local barX = 44
+local barY = 3
 local reactor = peripheral.wrap("back")
 local monitor = peripheral.wrap("top")
 
 local function drawVerticalBar(percent)
     local filled = math.floor((percent / 100) * barHeight)
-
+    monitor.setCursorPos(barX, barY-1)
+    monitor.write("+-+")
     for i = 1, barHeight do
     monitor.setCursorPos(barX, barY + (barHeight-i))
         if i <= filled then
             -- monitor.write("█")
+            monitor.setBackgroundColor(colors.black)
+            monitor.write("|")
             monitor.setBackgroundColor(colors.purple)
             monitor.write(" ")
+            monitor.setBackgroundColor(colors.black)
+            monitor.write("|")
         else
             monitor.setBackgroundColor(colors.black)
-            monitor.write(" ")
+            monitor.write("| |")
         end
     end
+    monitor.setCursorPos(barX, barY+barHeight)
+    monitor.write("+-+")
 end
 
 
