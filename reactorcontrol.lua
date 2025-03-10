@@ -17,6 +17,7 @@ local midlevel = 50
 local barHeight = 14
 local barX = 44
 local barY = 3
+local buffercolor = colors.purple
 
 
 local function calcTrend(energylevels, leveldiff)
@@ -42,7 +43,7 @@ local function drawVerticalBar(percent)
         if i <= filled then
             monitor.setBackgroundColor(colors.black)
             monitor.write("|")
-            monitor.setBackgroundColor(colors.purple)
+            monitor.setBackgroundColor(buffercolor)
             monitor.write(" ")
             monitor.setBackgroundColor(colors.black)
             monitor.write("|")
@@ -104,9 +105,8 @@ while true do
     end
 
     drawVerticalBar(percentenergy)
-
     lastlevel = newlevel
-
-    print()
-
+    sleep(10)
 end
+
+-- markera för varje rad i leveldiff history om reaktorn var på eller inte? 
