@@ -18,6 +18,7 @@ local barHeight = 14
 local barX = 44
 local barY = 3
 
+
 local function calcTrend(energylevels, leveldiff)
     table.remove(energylevels, 1)
     table.insert(energylevels, leveldiff)
@@ -30,6 +31,7 @@ local function calcTrend(energylevels, leveldiff)
 
     return sum / #energylevels
 end
+
 
 local function drawVerticalBar(percent)
     local filled = math.floor((percent / 100) * barHeight)
@@ -103,7 +105,6 @@ while true do
 
     drawVerticalBar(percentenergy)
 
-    sleep(10)
     lastlevel = newlevel
 
     print()

@@ -1,5 +1,4 @@
 local barHeight = 14
-local textX = 1
 local barX = 44
 local barY = 3
 local reactor = peripheral.wrap("back")
