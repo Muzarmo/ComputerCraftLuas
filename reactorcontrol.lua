@@ -2,7 +2,13 @@
 -- Base idea is to lower control rods to the current reactor energy buffer level as way of a simple control mechanism.
 -- Being expanded upon since then
 
-local energylevels = {0, 0, 0, 0, 0}
+local energylevels = {
+    {0, false},
+    {0, false},
+    {0, false},
+    {0, false},
+    {0, false}
+}
 local reactor = peripheral.wrap("back")
 local monitor = peripheral.wrap("top")
 local storedenergy = reactor.getEnergyStored()
@@ -10,6 +16,7 @@ local percentenergy = math.ceil(storedenergy / 100000)
 local newlevel = percentenergy
 local lastlevel = percentenergy
 local trendvalue = percentenergy
+local isproducing = reactor.getEnergyProducedLastTick() > 0
 
 local highlevel = 85
 local midlevel = 50
@@ -20,14 +27,14 @@ local barY = 3
 local buffercolor = colors.purple
 
 
-local function calcTrend(energylevels, leveldiff)
+local function calcTrend(energylevels, leveldiff, isProducing)
     table.remove(energylevels, 1)
-    table.insert(energylevels, leveldiff)
+    table.insert(energylevels, {leveldiff, isProducing})
 
     local sum = 0
 
     for _, v in ipairs(energylevels) do
-        sum = sum + v
+        sum = sum + v[1]
     end
 
     return sum / #energylevels
@@ -64,19 +71,23 @@ while true do
     storedenergy = reactor.getEnergyStored()
     percentenergy = math.ceil(storedenergy / 100000)
     newlevel = percentenergy
+    isproducing = reactor.getEnergyProducedLastTick() > 0
 
     leveldiff = newlevel - lastlevel
-    trendvalue = calcTrend(energylevels, leveldiff)
+    trendvalue = calcTrend(energylevels, leveldiff, isproducing)
     print("Trendvalue is " .. trendvalue)
     print("Reactor buffer is " .. storedenergy .. " RF")
     print("That is " .. percentenergy .. " % of total capacity")
+    print("Isproduing is " .. tostring(isproducing))
     print("Newlevel is " .. newlevel)
     print("Lastlevel is " .. lastlevel)
     print("Leveldiff " .. leveldiff)
     print("Leveldiff history:")
+    print(string.format("%-8s %-6s", "Trend", "On/Off"))
 
     for i, v in ipairs(energylevels) do
-        print("[" .. i .. "] " .. v)
+        print(string.format("[%d] %-4d %-6s", i, v[1], tostring(v[2])))
+        -- print("[" .. i .. "] " .. v[1] .. "      " .. tostring(v[2]))
     end
 
     if percentenergy <= midlevel then
@@ -106,6 +117,7 @@ while true do
 
     drawVerticalBar(percentenergy)
     lastlevel = newlevel
+
     sleep(10)
 end
 
