@@ -71,7 +71,7 @@ while true do
     storedenergy = reactor.getEnergyStored()
     percentenergy = math.ceil(storedenergy / 100000)
     newlevel = percentenergy
-    isproducing = reactor.getEnergyProducedLastTick() > 0
+    isproducing = reactor.getEnergyProducedLastTick() > 1000
 
     leveldiff = newlevel - lastlevel
     trendvalue = calcTrend(energylevels, leveldiff, isproducing)
@@ -79,14 +79,20 @@ while true do
     print("Reactor buffer is " .. storedenergy .. " RF")
     print("That is " .. percentenergy .. " % of total capacity")
     print("Isproduing is " .. tostring(isproducing))
-    print("Newlevel is " .. newlevel)
-    print("Lastlevel is " .. lastlevel)
+    print("New/last level is " .. newlevel .. "/" .. lastlevel)
     print("Leveldiff " .. leveldiff)
     print("Leveldiff history:")
     print(string.format("%-8s %-6s", "Trend", "On/Off"))
 
     for i, v in ipairs(energylevels) do
-        print(string.format("[%d] %-4d %-6s", i, v[1], tostring(v[2])))
+        onoff = ""
+        if v[2] == true then
+            onoff = "On"
+        else
+            onoff = "Off"
+        end
+        print(string.format("[%d] %-4d %-6s", i, v[1], onoff))
+        -- print(string.format("[%d] %-4d %-6s", i, v[1], tostring(v[2])))
         -- print("[" .. i .. "] " .. v[1] .. "      " .. tostring(v[2]))
     end
 
@@ -121,4 +127,10 @@ while true do
     sleep(10)
 end
 
+-- ideer
+-- extra bar för rod level/aktivitet
+-- knapp för full effekt/override
+
+
+-- utförda
 -- markera för varje rad i leveldiff history om reaktorn var på eller inte? 
