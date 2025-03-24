@@ -20,6 +20,31 @@ alienisjar = component.proxy("787a1c51-2249-4869-a6ce-60904ac7274c")
 
 
 
+-- så inte helt uppenbart vad strategin ska vara för påfyllnad av jars
+-- sannolikt en runda där alla jars innehåll analyseras
+-- sen påfyllnad av alla? prioriteringsrunda?
+-- prioritering skulle kunna vara att ta aspects som har "bonusaspects" genom centrifugering först, och sen omvärdering
+-- kanske ändå bättre att bara ta alla och försöka räkna på hur mycket bonus det blir för varje
+
+-- Nästa grej blir att bestämma hur långa cyklerna ska vara
+-- tre möjligheter
+-- 1. höfta
+-- 2. ha en adapter som kollar när den aktiva cykeln är klar genom att se om det är något i smelteryt
+-- 3. hade en till idé, men minns inte just nu =)
+--  - men kanske det var att bekräfta att aspects dyker upp? och sen börja en ny cykel. det är ett rätt bra mellansteg
+
+-- När ska en ny cykel starta? Med bestämda mellanrum, eller när en aspect går lågt? Känns snajdigare med start när en aspect är låg. 
+-- I så fall en funktion för att analysera mängder, och en för att göra en påfyllnadscykel. Och kanske en för att avgöra när cykeln är slut? 
+
+
+
+
+
+-- framtida saker:
+-- analysera jars och designera för varje uppstart
+
+
+
 -- aspects3 = jar3.getAspects()
 --
 -- for aspect, amount in pairs(aspects3) do
