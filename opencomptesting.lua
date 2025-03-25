@@ -18,8 +18,6 @@ alienisjar = component.proxy("787a1c51-2249-4869-a6ce-60904ac7274c")
 
 
 
-
-
 -- så inte helt uppenbart vad strategin ska vara för påfyllnad av jars
 -- sannolikt en runda där alla jars innehåll analyseras
 -- sen påfyllnad av alla? prioriteringsrunda?
@@ -31,7 +29,7 @@ alienisjar = component.proxy("787a1c51-2249-4869-a6ce-60904ac7274c")
 -- 1. höfta
 -- 2. ha en adapter som kollar när den aktiva cykeln är klar genom att se om det är något i smelteryt
 -- 3. hade en till idé, men minns inte just nu =)
---  - men kanske det var att bekräfta att aspects dyker upp? och sen börja en ny cykel. det är ett rätt bra mellansteg
+--  - men kanske det var att bekräfta att aspects dyker upp? och sen börja en ny cykel. det är ett rätt bra mellanlösning!
 
 -- När ska en ny cykel starta? Med bestämda mellanrum, eller när en aspect går lågt? Känns snajdigare med start när en aspect är låg. 
 -- I så fall en funktion för att analysera mängder, och en för att göra en påfyllnadscykel. Och kanske en för att avgöra när cykeln är slut? 
@@ -42,6 +40,8 @@ alienisjar = component.proxy("787a1c51-2249-4869-a6ce-60904ac7274c")
 
 -- framtida saker:
 -- analysera jars och designera för varje uppstart
+-- menysystem för vad man vill göra?
+-- funktioner/klasser för de olika sakerna (meny, analys, start)
 
 
 
