@@ -2,6 +2,9 @@
 -- Base idea is to lower control rods to the current reactor energy buffer level as way of a simple control mechanism.
 -- Being expanded upon since then
 
+if not sleep then sleep = sleep end
+
+
 local energylevels = {
     {0, false},
     {0, false},

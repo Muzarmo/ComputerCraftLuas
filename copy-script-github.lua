@@ -6,7 +6,7 @@ local url = "https://raw.githubusercontent.com/Muzarmo/ComputerCraftLuas/refs/he
 local filePath = "startup.lua"
 
 -- Function to download the file
-function downloadFile(url, filePath)
+local function downloadFile(url, filePath)
     local response = http.get(url)  -- Perform the GET request to fetch the file
     if response then
         local file = fs.open(filePath, "w")  -- Open the file for writing

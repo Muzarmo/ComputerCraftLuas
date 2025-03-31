@@ -1,3 +1,6 @@
+if not peripheral then peripheral = {} end
+if not colors then colors = {} end
+
 local barHeight = 14
 local barX = 44
 local barY = 3
