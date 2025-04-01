@@ -27,10 +27,6 @@ local function stuff_mover(thing, amount)
 			transposer.transferItem(chestpickupside, chestburnside, stack["size"], slot, slot)
 			amount = amount - stack["size"]
 		end
-
-		-- for stuff, amount in pairs(stack) do
-			-- print(stuff .. tostring(amount))
-		-- end
 	end
 end
 
