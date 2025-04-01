@@ -17,16 +17,26 @@ local sourcechestinventory = {}
 local function stuff_mover(thing, amount)
 	for slot=1, size do
 		local stack = transposer.getStackInSlot(chestpickupside, slot)
-		if stack and stack["name"] == thing then
+		if stack and stack["name"] == thing and stack["size"] >= amount then
 			print("Hittade " .. thing .. "!")
 			print("Flyttar " .. amount .. " " .. thing .. " till burn chest!")
 			transposer.transferItem(chestpickupside, chestburnside, amount, slot, slot)
 			break
+		elseif stack and stack["name"] == thing and stack["size"] < amount then
+			print("Hittade del av " .. thing .. ". Delflyttar och fortsätter leta!")
+			transposer.transferItem(chestpickupside, chestburnside, stack["size"], slot, slot)
+			amount = amount - stack["size"]
 		end
+
 		-- for stuff, amount in pairs(stack) do
 			-- print(stuff .. tostring(amount))
 		-- end
 	end
+end
+
+local function reset_aspects()
+	aspectlist = {}
+	print("Aspect list reset")
 end
 
 
@@ -52,23 +62,25 @@ local function add_aspect(aspect, add_amount)
 		local nopearls = math.ceil(add_amount / 10)
 		stuff_mover("minecraft:ender_pearl", nopearls)
 		aspectlist["Alienis"] = aspectlist["Alienis"] + (nopearls * 10)
-		aspectlist["Ordo"] = aspectlist["Ordo"] + nopearls * 7
+		aspectlist["Ordo"] = aspectlist["Ordo"] + (nopearls * 7.5)
 	end
 	if aspect == "Cognitio" then
 		local nopaper = math.ceil(add_amount / 2)
 		stuff_mover("minecraft:paper", nopaper)
 		aspectlist["Cognitio"] = aspectlist["Cognitio"] + (nopaper * 2)
-		aspectlist["Victus"] = aspectlist["Victus"] + (nopaper * 2)
+		aspectlist["Victus"] = aspectlist["Victus"] + (nopaper * 1.5)
 	end
 	if aspect == "Ordo" then
 		local nostonebrick = add_amount
 		stuff_mover("minecraft:stonebrick", nostonebrick)
+		aspectlist["Ordo"] = aspectlist["Ordo"] + nostonebrick
 	end
 end
 
 
 -- funktion för att inventera jars (och transposer) och lagra deras adresser
 local function jaradresses()
+	reset_aspects()
 	for jaradress, jartype in complist do
 		if jartype == "jar_void" then
 			table.insert(void_jars, jaradress)
@@ -133,20 +145,31 @@ local function refilljars()
 end
 
 
+local function printjarcontents()
+	for aspect, amount in pairs(aspectlist) do
+		print(aspect .. ": " .. amount)
+	end
+end
+
+
 local function main()
+	jaradresses()
 	while true do
 		print([[Meny: 
-1. Samla adresser
-2. Fyll på jars
-3. Indexera källkistan
+1. Samla adresser / indexera jars
+2. Visa innehåll i aspectlist
+3. Fyll på jars
+4. Indexera källkistan
 0. Avsluta]])
 		io.write("Välj ett alternativ: ")
 		local choice = io.read()
 			if choice == "1" then
 				jaradresses()
 			elseif choice == "2" then
-				refilljars()
+				printjarcontents()
 			elseif choice == "3" then
+				refilljars()
+			elseif choice == "4" then
 				sourcechest()
 			elseif choice == "0" then
 				break
