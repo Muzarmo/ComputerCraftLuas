@@ -11,6 +11,7 @@ local chestpickupside = 3
 local chestburnside = 2
 local size = transposer.getInventorySize(chestpickupside)
 local sourcechestinventory = {}
+local essentiasmelterytype = {"Thaumic", 1,11}
 
 
 -- flyttar saker från source chest till burn chest
@@ -33,6 +34,14 @@ end
 local function reset_aspects()
 	aspectlist = {}
 	print("Aspect list reset")
+end
+
+local function change_smeltery_type()
+	if essentiasmelterytype[1] == "Thaumic" then
+		essentiasmelterytype = {"Base", 1,25}
+	elseif essentiasmelterytype[1] == "Base" then
+		essentiasmelterytype = {"Thaumic", 1,11}
+	end
 end
 
 
@@ -156,7 +165,7 @@ local function main()
 2. Visa innehåll i aspectlist
 3. Fyll på jars
 4. Indexera källkistan
-0. Avsluta]])
+5. Byt Smelterytyp. Nuvarande: ]] .. essentiasmelterytype[1] .. "\n0. Avsluta")
 		io.write("Välj ett alternativ: ")
 		local choice = io.read()
 			if choice == "1" then
@@ -167,6 +176,8 @@ local function main()
 				refilljars()
 			elseif choice == "4" then
 				sourcechest()
+			elseif choice == "5" then
+				change_smeltery_type()
 			elseif choice == "0" then
 				break
 			else
@@ -192,3 +203,28 @@ main()
 -- 	print(addr)
 -- end
 
+
+
+
+-- Ideer
+-- Variabel som man kan ändra från menyn med efficiency
+--  - 0.8 eller 0.9 beroende på vilken sorts Essentia Smeltery man har
+
+-- Multiplikator för 0.9: 1.11
+-- Multiplikator för 0.8: 1.25
+--
+-- Behövs säkert städas i de floats som uppstår efteråt
+--
+--
+-- Snygga till formatet för vad som skrivs på skärmen
+-- - ex så att aspectrapporterna kommer i rader som står ovanför varandra
+--
+-- Fixa till sourcechest så att den faktiskt inventerar i källkistan och ger någon sorts rapport av hur mkt potentiella aspects som finns
+--
+-- Fixa språk så det blir tydligt vad som är potentiella aspects, och vad som redan finns i jars
+
+
+-- Möjligt att snygga till refilljars med en enda for loop som bara går igenom alla aspects in aspectlist? 
+
+-- Göra en lista med vilken sak som ska adderas för att lägga till essentia för varje aspect, och göra en for loop av det? 
+-- - problem om man vill lägga till två alternativ? Går att få till? 
