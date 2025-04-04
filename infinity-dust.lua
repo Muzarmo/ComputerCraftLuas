@@ -1,8 +1,6 @@
 -- For sending redstone pulses to a Mechanical user, setting fire to Bedrock to make infinity dust
 -- Burning time seems to be 19-31 seconds, 80% lower than 29s
 
-if not rs then rs = {} end
-
 local pulseno = 1
 
 while true do

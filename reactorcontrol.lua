@@ -2,9 +2,6 @@
 -- Base idea is to lower control rods to the current reactor energy buffer level as way of a simple control mechanism.
 -- Being expanded upon since then
 
-if not sleep then sleep = sleep end
-
-
 local energylevels = {
     {0, false},
     {0, false},
@@ -76,7 +73,7 @@ while true do
     newlevel = percentenergy
     isproducing = reactor.getEnergyProducedLastTick() > 1000
 
-    leveldiff = newlevel - lastlevel
+    local leveldiff = newlevel - lastlevel
     trendvalue = calcTrend(energylevels, leveldiff, isproducing)
     print("Trendvalue is " .. trendvalue)
     print("Reactor buffer is " .. storedenergy .. " RF")
@@ -88,7 +85,7 @@ while true do
     print(string.format("%-8s %-6s", "Trend", "On/Off"))
 
     for i, v in ipairs(energylevels) do
-        onoff = ""
+        local onoff = ""
         if v[2] == true then
             onoff = "On"
         else
