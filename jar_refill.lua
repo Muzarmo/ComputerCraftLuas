@@ -1,6 +1,6 @@
 
 local component = require("component")
-local potential_aspects = {"Cognitio", "Alienis", "Ordo", "Victus"}
+local ordered_aspects = {"Cognitio", "Alienis", "Ordo", "Victus", "Perditio", "Ignis"}
 local aspect_add_data = {
 	Cognitio = {"minecraft:paper", 2},
 	Alienis = {"minecraft:ender_pearl", 10},
@@ -12,15 +12,19 @@ local normal_jars = {}
 local complist = component.list()
 local transposer = component.transposer
 local aspectlist = {}
+local checkedcontents = false
 local chestpickupside = 3
 local chestburnside = 2
 local size = transposer.getInventorySize(chestpickupside)
 local sourcechestinventory = {}
-local essentiasmelterytype = {"Thaumic", 1.11}
+local essentiasmelterytype = {"Thaumic", 0.9}
 
 
 -- flyttar saker från source chest till burn chest
 local function stuff_mover(thing, amount)
+	print()
+	print("Stuff mover har blivit tillsagd att flytta " .. amount .. " av " .. thing)
+	print("I Stuff mover så är amount en " .. math.type(amount))
 	for slot=1, size do
 		local stack = transposer.getStackInSlot(chestpickupside, slot)
 		if stack and stack["name"] == thing and stack["size"] >= amount then
@@ -29,7 +33,7 @@ local function stuff_mover(thing, amount)
 			transposer.transferItem(chestpickupside, chestburnside, amount, slot, slot)
 			break
 		elseif stack and stack["name"] == thing and stack["size"] < amount then
-			print("Hittade " .. stack["size"] .. thing .. ". Delflyttar och fortsätter leta!")
+			print("Hittade " .. stack["size"] .. " " .. thing .. ". Delflyttar och fortsätter leta!")
 			transposer.transferItem(chestpickupside, chestburnside, stack["size"], slot, slot)
 			amount = amount - stack["size"]
 		end
@@ -47,9 +51,9 @@ end
 -- function för att byta smelterytyp
 local function change_smeltery_type()
 	if essentiasmelterytype[1] == "Thaumic" then
-		essentiasmelterytype = {"Base", 1.25}
+		essentiasmelterytype = {"Base", 0.8}
 	elseif essentiasmelterytype[1] == "Base" then
-		essentiasmelterytype = {"Thaumic", 1.11}
+		essentiasmelterytype = {"Thaumic", 0.9}
 	end
 end
 
@@ -60,11 +64,19 @@ local function sum_aspects(jar)
 	for aspect, amount in pairs(aspects) do
 		if aspectlist[aspect] then
 			aspectlist[aspect] = aspectlist[aspect] + amount
-			print("La till " .. amount .. " till " .. aspect .. ". Ny total är " .. aspectlist[aspect])
+			print("La till " .. amount .. " till " .. aspect .. ". Ny total: " .. aspectlist[aspect])
 		else
 			aspectlist[aspect] = amount
-			print("Ny aspect: " .. aspect .. ". Den har ".. aspectlist[aspect])
+			print("Ny jar-aspect: " .. aspect .. ". Total: ".. aspectlist[aspect])
 		end
+	end
+end
+
+
+-- function för att lägga till extra-/biaspekter
+local function extra_aspect(bi_aspect)
+	if bi_aspect == "Cognito" then
+		print("")
 	end
 end
 
@@ -73,31 +85,46 @@ end
 local function add_aspect(aspect, add_amount)
 	print("Add-aspect function har blivit tillsagd att lägga till " .. add_amount .. " till " .. aspect)
 	if aspect_add_data[aspect] then
-		local block_type, no_blocks = table.unpack(aspect_add_data[aspect])
-		no_blocks = no_blocks * essentiasmelterytype[2] * add_amount
+		local block_type, block_value = table.unpack(aspect_add_data[aspect])
+		local no_blocks = (add_amount/essentiasmelterytype[2])/block_value
 		print("Antal block att flytta med förbränningsgrad medräknad är " .. no_blocks .. " och avrundat blir det " .. math.floor(no_blocks))
-		print("Lägger även till " .. add_amount .. " till aspectlist för " .. aspect)
+		local add_amount_blocks = math.floor(math.floor(no_blocks) * block_value * essentiasmelterytype[2])
+		print("Lägger även till " .. add_amount_blocks .. " (som har effektivitet medräknad och är avrundat nedåt) till aspectlist för " .. aspect)
+		print("Add_amount utan effektivitetsberäkning och avrundning hade varit ".. add_amount)
 		print("Före: " .. aspect .. ": " .. aspectlist[aspect])
-		aspectlist[aspect] = aspectlist[aspect] + add_amount
+		aspectlist[aspect] = aspectlist[aspect] + add_amount_blocks
 		print("Efter: " .. aspect .. ": " .. aspectlist[aspect])
+		
+		stuff_mover(block_type, math.floor(no_blocks))
 
-		print(block_type .. ": " .. no_blocks)
+		print("block_type: " .. block_type)
+		print("block_value: " .. block_value)
+		print("no_blocks: " .. no_blocks)
 	end
 	
 	-- det behövs också på något sätt läggas till bi-aspekterna
+	-- måste också på något sätt fixa ordningen, så aspekter med relevanta biaspekter kommer först
 	
-	for baseaspect, value in pairs(aspect_add_data) do
-		print(baseaspect)
-		local block, blockamount = table.unpack(value)
-		print(block .. ": " .. blockamount)
+	-- for baseaspect, value in pairs(aspect_add_data) do
+	-- 	print(baseaspect)
+	-- 	local block, blockamount = table.unpack(value)
+	-- 	print(block .. ": " .. blockamount)
 
-	end
+	-- end
 end
 
 
 -- debugfunktionen
 local function debug()
-	add_aspect("Ordo", 12)
+	print()
+	add_aspect("Alienis", 57)
+	
+	-- print("Skriver värden i aspectlist, förhoppningsvis i ordning")
+	-- for _, aspect in ipairs(ordered_aspects) do
+	-- 	if aspectlist[aspect] then
+	-- 		print(aspect, aspectlist[aspect])
+	-- 	end	
+	-- end
 end
 
 -- gamla funktionen för att lägga till aspekter
@@ -140,12 +167,13 @@ local function jaradresses()
 		-- den här behövs nog inte alls, förrän jag har fler transposers
 		end
 	end
-	for _, aspect in ipairs(potential_aspects) do
+	for _, aspect in ipairs(ordered_aspects) do
 		if not aspectlist[aspect] then
 			aspectlist[aspect] = 0
 			print("Det finns ingen " .. aspect .. ", lägger till som 0")
 		end
 	end
+	checkedcontents = true
 end
 
 
@@ -167,20 +195,28 @@ end
 
 -- funktion för att fylla på jars utifrån behov
 local function refilljars()
-	for aspect, amount in pairs(aspectlist) do
-		if amount < 200 then
+	jaradresses()
+	for _, aspect in ipairs(ordered_aspects) do
+		if aspectlist[aspect] < 200 then
 			print(aspect .. " är under 200!")
-			local add_amount = 250 - amount
+			local add_amount = 250 - aspectlist[aspect]
 			add_aspect(aspect, add_amount)
 		end
 	end
+	checkedcontents = false
 end
 
 
--- funktion för att skriva vad den beräknade aspect list innehåller (dvs eg inte vad som finns i jars)
+-- funktion för att skriva vad aspect list innehåller
 local function printjarcontents()
+	print()
 	for aspect, amount in pairs(aspectlist) do
 		print(aspect .. ": " .. amount)
+	end
+	if checkedcontents == true then
+		print("Innehållet i listan är KONTROLLERAT")
+	elseif checkedcontents == false then
+		print("Innehållet i listan är BERÄKNAT")
 	end
 end
 
@@ -193,7 +229,7 @@ local function main()
 Meny: 
 1. Samla adresser / indexera jars
 2. Visa innehåll i aspectlist
-3. Fyll på jars
+3. Indexera och fyll på jars
 4. Indexera källkistan
 5. Byt Smelterytyp. Nuvarande: %s
 6. Debug 
