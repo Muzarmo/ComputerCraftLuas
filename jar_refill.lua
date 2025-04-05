@@ -8,14 +8,10 @@ local aspect_add_data = {
 }
 
 
--- chests transposer:   dd868d05-f35c-4b63-97b1-5e2e70998eec
--- smeltery transposer: 0affe223-d7e9-44a3-a8de-7b416e63a241
-
 local void_jars = {}
 local normal_jars = {}
 local complist = component.list()
 local chesttransposer = component.proxy("dd868d05-f35c-4b63-97b1-5e2e70998eec")
-local smelttransposer = component.proxy("0affe223-d7e9-44a3-a8de-7b416e63a241")
 local aspectlist = {}
 local checkedcontents = false
 local chestpickupside = 3
@@ -117,23 +113,6 @@ local function debug()
 	print()
 	-- add_aspect("Alienis", 57)
 
-	-- print("Skriver värden i aspectlist, förhoppningsvis i ordning")
-	-- for _, aspect in ipairs(ordered_aspects) do
-	-- 	if aspectlist[aspect] then
-	-- 		print(aspect, aspectlist[aspect])
-	-- 	end	
-	-- end
-
-	local invname = smelttransposer.getInventoryName(transpsmeltside)
-	local invsize = smelttransposer.getInventorySize(transpsmeltside)
-	local fluid = smelttransposer.getTankLevel(transpsmeltside, 1)
-	-- local stackinslot = smelttransposer.getStackInSlot(transpsmeltside, 1)
-	-- print(invname)
-	-- print(invsize)
-	for one, two in pairs(fluid) do
-		print(one)
-		print(two)
-	end
 end
 
 
@@ -149,9 +128,6 @@ local function jaradresses()
 			table.insert(normal_jars, jaradress)
 			local jar = component.proxy(jaradress)
 			sum_aspects(jar)
-		-- elseif jartype == "transposer" then
-		-- 	local transposer = component.proxy(jaradress)
-		-- den här behövs nog inte alls, förrän jag har fler transposers
 		end
 	end
 	for _, aspect in ipairs(ordered_aspects) do
@@ -247,15 +223,12 @@ end
 main()
 
 
--- chests transposer:   dd868d05-f35c-4b63-97b1-5e2e70998eec
--- smeltery transposer: 0affe223-d7e9-44a3-a8de-7b416e63a241
-
-
-
 
 
 -- Ideer
 --
+--
+-- När allt funkar: en autofunktion som fyller på jars kontinuerligt
 --
 -- Snygga till formatet för vad som skrivs på skärmen
 -- - ex så att aspectrapporterna kommer i rader som står ovanför varandra
@@ -272,3 +245,17 @@ main()
 
 -- Göra en key-value med display-motsvarigheter till minecraft-variablerna för block. Så att den skriver "Stone" istället för 
 -- minecraft:stone. 
+
+
+-- Sourcechestplan:
+-- Kolla igenom kistan och summera dels
+-- - antalet block och typ
+-- - och summera aspekter, dels hur många per blocktyp, men även totalt. 
+-- Ska detta bli två olika tables? Lägga till aspekter och mängder per block i aspect_add_data och antal block i sourcechestinventory?
+-- Det blir komplext hur man än vrider och vänder på det. På något sätt måste ju scriptet bestämma vilket material det ska använda. 
+-- Extraaspekter (som ska gå genom centrifuges) blir också en helt egen historia. 
+
+-- En egen lista med blockpreferenser för olika aspekter? På det sättet löser man beslutsproblet, och sen blir det lätt att ta de skapade aspekterna 
+-- från listan som sourcechestinventory skapar. Prövar med detta. 
+-- Så först sourcechestinventory som ska innehålla
+-- Typ av block, antal, och även lagra aspekter för varje block - men i ett separat table? 
