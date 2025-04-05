@@ -1,24 +1,26 @@
 
 local component = require("component")
 local ordered_aspects = {"Cognitio", "Alienis", "Ordo", "Victus", "Perditio", "Ignis", "Potentia"}
-local aspect_add_data = {
-	Cognitio = {"minecraft:paper", 2},
-	Alienis = {"minecraft:ender_pearl", 10},
-	Ordo = {"minecraft:stonebrick", 1}
-}
-
-
+-- ordning för hur aspekter ska brännas, med tanke på biaspekter
+local aspect_add_data = {}
+-- lista som populeras av sourcechestinventory(), och som ska innehålla blocktyper i source chest, och deras aspect-värden
+local sourcechestinventory = {}
+-- source chest inventory. Blocktyper och antal. 
+local aspectlist = {}
+-- lista för hur mycket aspekter som finns i jars. Kan vara mätt eller beräknad
+local sourcechesttotals = {}
+-- summan av block i source chest
+local checkedcontents = false
+-- anger om aspectlist är mätt eller beräknad
 local void_jars = {}
 local normal_jars = {}
 local complist = component.list()
 local chesttransposer = component.proxy("dd868d05-f35c-4b63-97b1-5e2e70998eec")
-local aspectlist = {}
-local checkedcontents = false
+-- det finns just nu bara en transposer, och den har den här adressen
 local chestpickupside = 3
 local chestburnside = 2
-local transpsmeltside = 1
 local size = chesttransposer.getInventorySize(chestpickupside)
-local sourcechestinventory = {}
+-- storleken på source chest
 local essentiasmelterytype = {"Thaumic", 0.9}
 
 
@@ -112,6 +114,18 @@ end
 local function debug()
 	print()
 	-- add_aspect("Alienis", 57)
+	-- local testinv = sourcechestinventory[3]
+	-- for k, v in pairs(testinv) do
+	-- 	print("key: " .. tostring(k) ..", value: " ..tostring(v))
+	-- end
+	-- if testinv.aspects then
+	-- 	for aspect1, aspect2 in pairs(testinv.aspects) do
+	-- 		print("Aspect1: " .. tostring(aspect1) .. ", aspect2: " .. tostring(aspect2))
+	-- 	end
+	-- end
+	for k, v in pairs(sourcechestinventory.slot) do
+		print("key: " .. k .. ", value: " .. v)
+	end
 
 end
 
@@ -142,17 +156,42 @@ end
 
 -- funktion för att inventera kistan med källmaterial (och göra en lista av det?)
 local function sourcechest()
-	print("Data från chestpickupside")
-	print(chesttransposer.getSlotStackSize(chestpickupside, 1) .. " SlotStacSize 1")
-	print(chesttransposer.getInventorySize(chestpickupside) .. " getInventorySize")
-	local slot1 = (chesttransposer.getStackInSlot(chestpickupside, 1))
-	for info, info2 in pairs(slot1) do
-		print(info .. " " .. tostring(info2))
-	end
+	-- print("Data från chestpickupside")
+	-- print(chesttransposer.getSlotStackSize(chestpickupside, 1) .. " SlotStacSize 1")
+	-- print(chesttransposer.getInventorySize(chestpickupside) .. " getInventorySize")
+	-- local slot1 = (chesttransposer.getStackInSlot(chestpickupside, 1))
+	-- for info, info2 in pairs(slot1) do
+	-- 	print(info .. " " .. tostring(info2))
+	-- end
 
-	for info3, info4 in pairs(slot1["aspects"]) do
-		print(info3 .. " " .. info4)
+	-- for info3, info4 in pairs(slot1["aspects"]) do
+	-- 	print(info3 .. " " .. info4)
+	-- end
+	for slot=1, size do
+		local stack = chesttransposer.getStackInSlot(chestpickupside, slot)
+		if stack then
+			sourcechestinventory[slot] = {
+				name = stack.name,
+				size = stack.size,
+			}
+			if stack.aspects and not aspect_add_data[stack.name] then
+				aspect_add_data[stack.name] = {}
+				for aspect, amount in pairs(stack.aspects) do
+					aspect_add_data[stack.name][aspect] = amount
+				end
+			end
+		end
 	end
+	sourcechesttotals = {}
+	for _, blocktypelist in pairs(sourcechestinventory) do
+		local name = blocktypelist.name
+		local size = blocktypelist.size
+		sourcechesttotals[name] = (sourcechesttotals[name] or 0) + size
+	end
+	for key, value in pairs(sourcechesttotals) do
+		print("key: " .. key .. ", value: " .. value)
+	end
+	
 end
 
 
@@ -259,3 +298,12 @@ main()
 -- från listan som sourcechestinventory skapar. Prövar med detta. 
 -- Så först sourcechestinventory som ska innehålla
 -- Typ av block, antal, och även lagra aspekter för varje block - men i ett separat table? 
+
+-- Jag får det till att det blir tre listor/tables
+-- sourcechestinventory
+-- - innehåll i kistan, typ, antal men INTE aspekter - det lagras i aspect_add_data
+-- aspect_add_data
+-- - potentiella aspekter för varje blocktyp
+-- ordered_aspects
+-- - ordningen för hur aspekter ska läggas till när jars fylls på
+-- - och möjligen preferensordning för vilken blocktyp som ska användas? 
