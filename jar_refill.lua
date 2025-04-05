@@ -1,15 +1,25 @@
 
 local component = require("component")
-local ordered_aspects = {"Cognitio", "Alienis", "Ordo", "Victus", "Perditio", "Ignis", "Potentia"}
+local ordered_aspects = {"Cognito", "Alienis", "Ordo", "Victus", "Perditio", "Ignis", "Potentia"}
 -- ordning för hur aspekter ska brännas, med tanke på biaspekter
+local preferred_aspect_blocks = {
+	Cognitio = {"minecraft:paper"},
+	Alienis = {"minecraft:ender_pearl"},
+	Ordo = {"minecraft:stonebrick"},
+	Victus = {"minecraft:sapling"},
+	Perditio = {"minecraft:gunpowder"},
+	Ignis = {"minecraft:coal"},
+	Potentia = {"minecraft:coal"}
+}
+-- föredraget block att bränna för att få aspekten
 local aspect_add_data = {}
 -- lista som populeras av sourcechestinventory(), och som ska innehålla blocktyper i source chest, och deras aspect-värden
 local sourcechestinventory = {}
 -- source chest inventory. Blocktyper och antal. 
-local aspectlist = {}
--- lista för hur mycket aspekter som finns i jars. Kan vara mätt eller beräknad
 local sourcechesttotals = {}
 -- summan av block i source chest
+local aspectlist = {}
+-- lista för hur mycket aspekter som finns i jars. Kan vara mätt eller beräknad
 local checkedcontents = false
 -- anger om aspectlist är mätt eller beräknad
 local void_jars = {}
@@ -76,7 +86,7 @@ local function sum_aspects(jar)
 end
 
 
--- function för att lägga till extra-/biaspekter
+-- funktion för att lägga till extra-/biaspekter
 local function extra_aspect(bi_aspect)
 	if bi_aspect == "Cognito" then
 		print("")
@@ -84,26 +94,33 @@ local function extra_aspect(bi_aspect)
 end
 
 
--- nya funktionen för att lägga till aspekter
+-- funktion för att lägga till aspekter
 local function add_aspect(aspect, add_amount)
 	print("Add-aspect function har blivit tillsagd att lägga till " .. add_amount .. " till " .. aspect)
-	if aspect_add_data[aspect] then
-		local block_type, block_value = table.unpack(aspect_add_data[aspect])
-		local no_blocks = (add_amount/essentiasmelterytype[2])/block_value
-		print("Antal block att flytta med förbränningsgrad medräknad är " .. no_blocks .. " och avrundat blir det " .. math.floor(no_blocks))
-		local add_amount_blocks = math.floor(math.floor(no_blocks) * block_value * essentiasmelterytype[2])
-		print("Lägger även till " .. add_amount_blocks .. " (som har effektivitet medräknad och är avrundat nedåt) till aspectlist för " .. aspect)
-		print("Add_amount utan effektivitetsberäkning och avrundning hade varit ".. add_amount)
-		print("Före: " .. aspect .. ": " .. aspectlist[aspect])
-		aspectlist[aspect] = aspectlist[aspect] + add_amount_blocks
-		print("Efter: " .. aspect .. ": " .. aspectlist[aspect])
-
-		stuff_mover(block_type, math.floor(no_blocks))
-
-		print("block_type: " .. block_type)
-		print("block_value: " .. block_value)
-		print("no_blocks: " .. no_blocks)
+	local preferred_block = preferred_aspect_blocks[aspect][1]
+	print("Preferred block: " .. preferred_block)
+	local secondary_aspects = {}
+	for k, v in pairs(aspect_add_data[preferred_block]) do
+		if aspect ~= k then
+			table.insert(secondary_aspects, k)
+		end
+		print(k) -- blir aspektnamn
+		print(v) -- blir aspektmängd 
 	end
+	local block_value = aspect_add_data[preferred_block][aspect]
+	local no_blocks = (add_amount/essentiasmelterytype[2])/block_value
+	print("Antal block att flytta med förbränningsgrad medräknad är " .. no_blocks .. " och avrundat blir det " .. math.floor(no_blocks))
+	local add_amount_blocks = math.floor(math.floor(no_blocks) * block_value * essentiasmelterytype[2])
+	print("Add_amount utan effektivitetsberäkning och avrundning hade varit ".. add_amount)
+	print("Före: " .. aspect .. ": " .. aspectlist[aspect])
+	aspectlist[aspect] = aspectlist[aspect] + add_amount_blocks
+	print("Efter: " .. aspect .. ": " .. aspectlist[aspect])
+
+	stuff_mover(preferred_block, math.floor(no_blocks))
+
+	print("preferred_block: " .. preferred_block)
+	print("block_value: " .. block_value)
+	print("no_blocks: " .. no_blocks)
 
 	-- det behövs också på något sätt läggas till bi-aspekterna
 
@@ -113,19 +130,9 @@ end
 -- debugfunktionen
 local function debug()
 	print()
-	-- add_aspect("Alienis", 57)
-	-- local testinv = sourcechestinventory[3]
-	-- for k, v in pairs(testinv) do
-	-- 	print("key: " .. tostring(k) ..", value: " ..tostring(v))
-	-- end
-	-- if testinv.aspects then
-	-- 	for aspect1, aspect2 in pairs(testinv.aspects) do
-	-- 		print("Aspect1: " .. tostring(aspect1) .. ", aspect2: " .. tostring(aspect2))
-	-- 	end
-	-- end
-	for k, v in pairs(sourcechestinventory.slot) do
-		print("key: " .. k .. ", value: " .. v)
-	end
+	add_aspect("Alienis", 17)
+
+
 
 end
 
@@ -154,20 +161,10 @@ local function jaradresses()
 end
 
 
--- funktion för att inventera kistan med källmaterial (och göra en lista av det?)
+-- funktion för att inventera kistan med källmaterial (och göra en lista av det)
+-- fixar också innehåll till aspect_add_data
 local function sourcechest()
-	-- print("Data från chestpickupside")
-	-- print(chesttransposer.getSlotStackSize(chestpickupside, 1) .. " SlotStacSize 1")
-	-- print(chesttransposer.getInventorySize(chestpickupside) .. " getInventorySize")
-	-- local slot1 = (chesttransposer.getStackInSlot(chestpickupside, 1))
-	-- for info, info2 in pairs(slot1) do
-	-- 	print(info .. " " .. tostring(info2))
-	-- end
-
-	-- for info3, info4 in pairs(slot1["aspects"]) do
-	-- 	print(info3 .. " " .. info4)
-	-- end
-	for slot=1, size do
+		for slot=1, size do
 		local stack = chesttransposer.getStackInSlot(chestpickupside, slot)
 		if stack then
 			sourcechestinventory[slot] = {
@@ -188,10 +185,6 @@ local function sourcechest()
 		local size = blocktypelist.size
 		sourcechesttotals[name] = (sourcechesttotals[name] or 0) + size
 	end
-	for key, value in pairs(sourcechesttotals) do
-		print("key: " .. key .. ", value: " .. value)
-	end
-	
 end
 
 
@@ -225,6 +218,7 @@ end
 
 local function main()
 	jaradresses()
+	sourcechest()
 	while true do
 		print(string.format([[
 		
