@@ -1,6 +1,6 @@
 
 local component = require("component")
-local ordered_aspects = {"Cognito", "Alienis", "Ordo", "Victus", "Perditio", "Ignis", "Potentia"}
+local ordered_aspects = {"Cognitio", "Alienis", "Ordo", "Victus", "Perditio", "Potentia", "Ignis"}
 -- ordning för hur aspekter ska brännas, med tanke på biaspekter
 local preferred_aspect_blocks = {
 	Cognitio = {"minecraft:paper"},
@@ -87,9 +87,24 @@ end
 
 
 -- funktion för att lägga till extra-/biaspekter
-local function extra_aspect(bi_aspect)
-	if bi_aspect == "Cognito" then
-		print("")
+local function extra_aspect(bi_aspect, bi_aspect_amount)
+	local sub_bi_aspect = "OKÄND"
+	if bi_aspect == "Motus" then
+		sub_bi_aspect = "Ordo"
+	elseif bi_aspect == "Herba" then
+		sub_bi_aspect = "Victus"
+	end
+	print("Extraaspektfunktionen har blivit varse om " .. bi_aspect_amount .. " " .. bi_aspect)
+	print("Centrifugerat blir det: " .. sub_bi_aspect)
+	print("Lägger till mängden " .. bi_aspect_amount .. " multiplicerat med hälften och effekivitetskoefficient.")
+	print(bi_aspect_amount .. " * " .. essentiasmelterytype[2] .. " * " .. "0.5")
+	local sub_biaspect_added = math.floor(0.5+(bi_aspect_amount * essentiasmelterytype[2] * 0.5))
+	print("Det blir: " .. sub_biaspect_added .. " av " .. sub_bi_aspect)
+
+	if aspectlist[sub_bi_aspect] then
+		aspectlist[sub_bi_aspect] = aspectlist[sub_bi_aspect] + sub_biaspect_added
+	elseif not aspectlist[sub_bi_aspect] then
+		print(sub_bi_aspect .. " fanns inte i aspektslistan!")
 	end
 end
 
@@ -100,12 +115,17 @@ local function add_aspect(aspect, add_amount)
 	local preferred_block = preferred_aspect_blocks[aspect][1]
 	print("Preferred block: " .. preferred_block)
 	local secondary_aspects = {}
-	for k, v in pairs(aspect_add_data[preferred_block]) do
-		if aspect ~= k then
-			table.insert(secondary_aspects, k)
+	for aspectblock, amountblock in pairs(aspect_add_data[preferred_block]) do
+		if aspect ~= aspectblock then
+			secondary_aspects[aspectblock] = amountblock
 		end
-		print(k) -- blir aspektnamn
-		print(v) -- blir aspektmängd 
+		print(aspectblock) -- blir aspektnamn
+		print(amountblock) -- blir aspektmängd (per block?)
+	end
+	for kk, vv in pairs(secondary_aspects) do
+		print("kk: " .. kk .. ", vv:" .. vv)
+		-- kk = ordningsnummer
+		-- vv = biaspekt
 	end
 	local block_value = aspect_add_data[preferred_block][aspect]
 	local no_blocks = (add_amount/essentiasmelterytype[2])/block_value
@@ -115,6 +135,16 @@ local function add_aspect(aspect, add_amount)
 	print("Före: " .. aspect .. ": " .. aspectlist[aspect])
 	aspectlist[aspect] = aspectlist[aspect] + add_amount_blocks
 	print("Efter: " .. aspect .. ": " .. aspectlist[aspect])
+
+	for extraaspect, extraamount in pairs(secondary_aspects) do
+		print("Extraaspekt till biaspektfunktionen: " .. extraaspect)
+		print("Och såhär många (per block): " .. extraamount)
+		local totalextraamount = extraamount*(math.floor(no_blocks))
+		print("Total mängd utan effektivitet eller halvering: ".. totalextraamount)
+		extra_aspect(extraaspect, totalextraamount)
+	end
+
+
 
 	stuff_mover(preferred_block, math.floor(no_blocks))
 
@@ -130,7 +160,7 @@ end
 -- debugfunktionen
 local function debug()
 	print()
-	add_aspect("Alienis", 17)
+	add_aspect("Cognitio", 17)
 
 
 
@@ -163,7 +193,10 @@ end
 
 -- funktion för att inventera kistan med källmaterial (och göra en lista av det)
 -- fixar också innehåll till aspect_add_data
+
 local function sourcechest()
+	print()
+	print("Indexerar källkistan till källkistlistan... ")
 		for slot=1, size do
 		local stack = chesttransposer.getStackInSlot(chestpickupside, slot)
 		if stack then
@@ -185,6 +218,7 @@ local function sourcechest()
 		local size = blocktypelist.size
 		sourcechesttotals[name] = (sourcechesttotals[name] or 0) + size
 	end
+	print("Klart!")
 end
 
 
@@ -194,7 +228,7 @@ local function refilljars()
 	for _, aspect in ipairs(ordered_aspects) do
 		if aspectlist[aspect] < 200 then
 			print(aspect .. " är under 200!")
-			local add_amount = 250 - aspectlist[aspect]
+			local add_amount = 240 - aspectlist[aspect]
 			add_aspect(aspect, add_amount)
 		end
 	end
