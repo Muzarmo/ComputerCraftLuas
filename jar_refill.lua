@@ -1,4 +1,5 @@
 
+local serpent = require("serpent")
 local component = require("component")
 local ordered_aspects = {"Cognitio", "Alienis", "Ordo", "Victus", "Perditio", "Potentia", "Ignis"}
 -- ordning för hur aspekter ska brännas, med tanke på biaspekter
@@ -8,8 +9,8 @@ local preferred_aspect_blocks = {
 	Ordo = {"minecraft:stonebrick"},
 	Victus = {"minecraft:sapling"},
 	Perditio = {"minecraft:gunpowder"},
-	Ignis = {"minecraft:coal"},
-	Potentia = {"minecraft:coal"}
+	Potentia = {"minecraft:coal"},
+	Ignis = {"minecraft:coal"}
 }
 -- föredraget block att bränna för att få aspekten
 local aspect_add_data = {}
@@ -29,7 +30,7 @@ local chesttransposer = component.proxy("dd868d05-f35c-4b63-97b1-5e2e70998eec")
 -- det finns just nu bara en transposer, och den har den här adressen
 local chestpickupside = 3
 local chestburnside = 2
-local size = chesttransposer.getInventorySize(chestpickupside)
+local sourcechestsize = chesttransposer.getInventorySize(chestpickupside)
 -- storleken på source chest
 local essentiasmelterytype = {"Thaumic", 0.9}
 
@@ -38,8 +39,8 @@ local essentiasmelterytype = {"Thaumic", 0.9}
 local function stuff_mover(thing, amount)
 	print()
 	print("Stuff mover har blivit tillsagd att flytta " .. amount .. " av " .. thing)
-	print("I Stuff mover så är amount en " .. math.type(amount))
-	for slot=1, size do
+	-- print("I Stuff mover så är amount en " .. math.type(amount))
+	for slot=1, sourcechestsize do
 		local stack = chesttransposer.getStackInSlot(chestpickupside, slot)
 		if stack and stack["name"] == thing and stack["size"] >= amount then
 			print("Hittade " .. amount .. " ".. thing .. ". Flyttar dom till burn chest.")
@@ -50,6 +51,11 @@ local function stuff_mover(thing, amount)
 			chesttransposer.transferItem(chestpickupside, chestburnside, stack["size"], slot, slot)
 			amount = amount - stack["size"]
 		end
+
+		-- todo: Stuff mover borde utgå från den redan indexerade källlistlistan
+		-- todo: stuff mover (alt add_aspect) kan kolla om det finns nog med material för att kunna utföra refill av jars
+		-- - som det är nu så händer ingenting, det blir inget felmeddelande, och beräkningen går igenom trots att blocken inte flyttats
+
 	end
 end
 
@@ -95,17 +101,20 @@ local function extra_aspect(bi_aspect, bi_aspect_amount)
 		sub_bi_aspect = "Victus"
 	end
 	print("Extraaspektfunktionen har blivit varse om " .. bi_aspect_amount .. " " .. bi_aspect)
-	print("Centrifugerat blir det: " .. sub_bi_aspect)
-	print("Lägger till mängden " .. bi_aspect_amount .. " multiplicerat med hälften och effekivitetskoefficient.")
-	print(bi_aspect_amount .. " * " .. essentiasmelterytype[2] .. " * " .. "0.5")
+	-- print("Centrifugerat blir det: " .. sub_bi_aspect)
+	-- print("Lägger till mängden " .. bi_aspect_amount .. " multiplicerat med hälften och effekivitetskoefficient.")
+	-- print(bi_aspect_amount .. " * " .. essentiasmelterytype[2] .. " * " .. "0.5")
 	local sub_biaspect_added = math.floor(0.5+(bi_aspect_amount * essentiasmelterytype[2] * 0.5))
-	print("Det blir: " .. sub_biaspect_added .. " av " .. sub_bi_aspect)
+	-- print("Det blir: " .. sub_biaspect_added .. " av " .. sub_bi_aspect)
 
 	if aspectlist[sub_bi_aspect] then
 		aspectlist[sub_bi_aspect] = aspectlist[sub_bi_aspect] + sub_biaspect_added
 	elseif not aspectlist[sub_bi_aspect] then
 		print(sub_bi_aspect .. " fanns inte i aspektslistan!")
 	end
+
+	-- todo: output kan bli snyggare med aspekter som inte finns i aspectlist och bara notera att de finns, men inte kommer att adderas
+
 end
 
 
@@ -115,52 +124,54 @@ local function add_aspect(aspect, add_amount)
 	local preferred_block = preferred_aspect_blocks[aspect][1]
 	print("Preferred block: " .. preferred_block)
 	local secondary_aspects = {}
-	for aspectblock, amountblock in pairs(aspect_add_data[preferred_block]) do
-		if aspect ~= aspectblock then
-			secondary_aspects[aspectblock] = amountblock
+	if aspect_add_data[preferred_block] then
+		for aspectblock, amountblock in pairs(aspect_add_data[preferred_block]) do
+			-- här blev det ett error när coal inte fanns med i source chest. Sannolikt för att coal inte finns i aspect_add_data. 
+			if aspect ~= aspectblock then
+				secondary_aspects[aspectblock] = amountblock
+			end
+			-- print(aspectblock) -- blir aspektnamn
+			-- print(amountblock) -- blir aspektmängd (per block?)
 		end
-		print(aspectblock) -- blir aspektnamn
-		print(amountblock) -- blir aspektmängd (per block?)
+	else
+		print("Det finns ingen passande blocktyp för " .. aspect .. " i source chest. Hoppar över.")
+		return
 	end
-	for kk, vv in pairs(secondary_aspects) do
-		print("kk: " .. kk .. ", vv:" .. vv)
+
+	-- for kk, vv in pairs(secondary_aspects) do
+		-- print("kk: " .. kk .. ", vv:" .. vv)
 		-- kk = ordningsnummer
 		-- vv = biaspekt
-	end
+	-- end
 	local block_value = aspect_add_data[preferred_block][aspect]
 	local no_blocks = (add_amount/essentiasmelterytype[2])/block_value
 	print("Antal block att flytta med förbränningsgrad medräknad är " .. no_blocks .. " och avrundat blir det " .. math.floor(no_blocks))
 	local add_amount_blocks = math.floor(math.floor(no_blocks) * block_value * essentiasmelterytype[2])
 	print("Add_amount utan effektivitetsberäkning och avrundning hade varit ".. add_amount)
-	print("Före: " .. aspect .. ": " .. aspectlist[aspect])
+	-- print("Före: " .. aspect .. ": " .. aspectlist[aspect])
 	aspectlist[aspect] = aspectlist[aspect] + add_amount_blocks
-	print("Efter: " .. aspect .. ": " .. aspectlist[aspect])
-
-	for extraaspect, extraamount in pairs(secondary_aspects) do
-		print("Extraaspekt till biaspektfunktionen: " .. extraaspect)
-		print("Och såhär många (per block): " .. extraamount)
-		local totalextraamount = extraamount*(math.floor(no_blocks))
-		print("Total mängd utan effektivitet eller halvering: ".. totalextraamount)
-		extra_aspect(extraaspect, totalextraamount)
-	end
-
-
+	-- print("Efter: " .. aspect .. ": " .. aspectlist[aspect])
 
 	stuff_mover(preferred_block, math.floor(no_blocks))
 
-	print("preferred_block: " .. preferred_block)
-	print("block_value: " .. block_value)
-	print("no_blocks: " .. no_blocks)
+	for extraaspect, extraamount in pairs(secondary_aspects) do
+		-- print("Extraaspekt till biaspektfunktionen: " .. extraaspect)
+		-- print("Och såhär många (per block): " .. extraamount)
+		local totalextraamount = extraamount*(math.floor(no_blocks))
+		-- print("Total mängd utan effektivitet eller halvering: ".. totalextraamount)
+		extra_aspect(extraaspect, totalextraamount)
+	end
 
-	-- det behövs också på något sätt läggas till bi-aspekterna
-
+	-- print("preferred_block: " .. preferred_block)
+	-- print("block_value: " .. block_value)
+	-- print("no_blocks: " .. no_blocks)
 end
 
 
 -- debugfunktionen
 local function debug()
 	print()
-	add_aspect("Cognitio", 17)
+	add_aspect("Potentia", 17)
 
 
 
@@ -193,25 +204,40 @@ end
 
 -- funktion för att inventera kistan med källmaterial (och göra en lista av det)
 -- fixar också innehåll till aspect_add_data
-
 local function sourcechest()
 	print()
 	print("Indexerar källkistan till källkistlistan... ")
-		for slot=1, size do
+	for slot=1, sourcechestsize do
 		local stack = chesttransposer.getStackInSlot(chestpickupside, slot)
 		if stack then
 			sourcechestinventory[slot] = {
 				name = stack.name,
 				size = stack.size,
 			}
-			if stack.aspects and not aspect_add_data[stack.name] then
-				aspect_add_data[stack.name] = {}
-				for aspect, amount in pairs(stack.aspects) do
-					aspect_add_data[stack.name][aspect] = amount
-				end
+		if stack.aspects and not aspect_add_data[stack.name] then
+			aspect_add_data[stack.name] = {}
+			for aspect, amount in pairs(stack.aspects) do
+				aspect_add_data[stack.name][aspect] = amount
 			end
 		end
+		end
 	end
+	-- for key, value in pairs(preferred_aspect_blocks) do
+	-- 	print("sourcechest indexering, visar preferred blocks:")
+	-- 	print("key: " .. tostring(key))
+	-- 	print("List values:")
+	-- 	for k, v in pairs(value) do
+	-- 		print("k: " .. k .. ", v: " .. v)
+	-- 	end
+	-- end
+	-- for _, blocklist in pairs(preferred_aspect_blocks) do
+	-- 	print(blocklist[1])
+	-- 	if not aspect_add_data[blocklist[1]] then
+	-- 		print(blocklist[1] .. " fanns inte i aspect_add_data. Lägger till som 0")
+	-- 		aspect_add_data[blocklist[1]] = 0
+	-- 	end
+	-- end
+	-- print(serpent.block(aspect_add_data))
 	sourcechesttotals = {}
 	for _, blocktypelist in pairs(sourcechestinventory) do
 		local name = blocktypelist.name
