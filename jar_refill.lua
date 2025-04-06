@@ -40,6 +40,7 @@ local function stuff_mover(thing, amount)
 	print()
 	print("Stuff mover har blivit tillsagd att flytta " .. amount .. " av " .. thing)
 	-- print("I Stuff mover så är amount en " .. math.type(amount))
+
 	for slot=1, sourcechestsize do
 		local stack = chesttransposer.getStackInSlot(chestpickupside, slot)
 		if stack and stack["name"] == thing and stack["size"] >= amount then
@@ -52,7 +53,7 @@ local function stuff_mover(thing, amount)
 			amount = amount - stack["size"]
 		end
 
-		-- todo: Stuff mover borde utgå från den redan indexerade källlistlistan
+		-- todo: Stuff mover borde utgå från den redan indexerade källkist-listan
 		-- todo: stuff mover (alt add_aspect) kan kolla om det finns nog med material för att kunna utföra refill av jars
 		-- - som det är nu så händer ingenting, det blir inget felmeddelande, och beräkningen går igenom trots att blocken inte flyttats
 
@@ -110,7 +111,7 @@ local function extra_aspect(bi_aspect, bi_aspect_amount)
 	if aspectlist[sub_bi_aspect] then
 		aspectlist[sub_bi_aspect] = aspectlist[sub_bi_aspect] + sub_biaspect_added
 	elseif not aspectlist[sub_bi_aspect] then
-		print(sub_bi_aspect .. " fanns inte i aspektslistan!")
+		print(bi_aspect .. " fanns inte definierad i subaspekterna")
 	end
 
 	-- todo: output kan bli snyggare med aspekter som inte finns i aspectlist och bara notera att de finns, men inte kommer att adderas
@@ -147,12 +148,13 @@ local function add_aspect(aspect, add_amount)
 	local no_blocks = (add_amount/essentiasmelterytype[2])/block_value
 	print("Antal block att flytta med förbränningsgrad medräknad är " .. no_blocks .. " och avrundat blir det " .. math.floor(no_blocks))
 	local add_amount_blocks = math.floor(math.floor(no_blocks) * block_value * essentiasmelterytype[2])
-	print("Add_amount utan effektivitetsberäkning och avrundning hade varit ".. add_amount)
-	-- print("Före: " .. aspect .. ": " .. aspectlist[aspect])
 	aspectlist[aspect] = aspectlist[aspect] + add_amount_blocks
-	-- print("Efter: " .. aspect .. ": " .. aspectlist[aspect])
 
 	stuff_mover(preferred_block, math.floor(no_blocks))
+
+	-- extraaspekterna behöver räknas innan man skickar begäran till stuff mover. 
+	-- saplings till ex har 5 victus och 15 herba, så det blir mer victus from herban än från victusen. 
+	-- det blir oftast inte ett problem, men bara för att cognitio skapar så mycket victus, att det knappt behöver skapas för sig självt. 
 
 	for extraaspect, extraamount in pairs(secondary_aspects) do
 		-- print("Extraaspekt till biaspektfunktionen: " .. extraaspect)
@@ -161,10 +163,6 @@ local function add_aspect(aspect, add_amount)
 		-- print("Total mängd utan effektivitet eller halvering: ".. totalextraamount)
 		extra_aspect(extraaspect, totalextraamount)
 	end
-
-	-- print("preferred_block: " .. preferred_block)
-	-- print("block_value: " .. block_value)
-	-- print("no_blocks: " .. no_blocks)
 end
 
 
