@@ -41,24 +41,58 @@ local function stuff_mover(thing, amount)
 	print("Stuff mover har blivit tillsagd att flytta " .. amount .. " av " .. thing)
 	-- print("I Stuff mover så är amount en " .. math.type(amount))
 
-	for slot=1, sourcechestsize do
-		local stack = chesttransposer.getStackInSlot(chestpickupside, slot)
-		if stack and stack["name"] == thing and stack["size"] >= amount then
-			print("Hittade " .. amount .. " ".. thing .. ". Flyttar dom till burn chest.")
-			chesttransposer.transferItem(chestpickupside, chestburnside, amount, slot, slot)
-			break
-		elseif stack and stack["name"] == thing and stack["size"] < amount then
-			print("Hittade " .. stack["size"] .. " " .. thing .. ". Delflyttar och fortsätter leta!")
-			chesttransposer.transferItem(chestpickupside, chestburnside, stack["size"], slot, slot)
-			amount = amount - stack["size"]
-		end
+	-- for slot=1, sourcechestsize do
+	-- 	local stack = chesttransposer.getStackInSlot(chestpickupside, slot)
+	-- 	if stack and stack["name"] == thing and stack["size"] >= amount then
+	-- 		print("Hittade " .. amount .. " ".. thing .. ". Flyttar dom till burn chest.")
+	-- 		chesttransposer.transferItem(chestpickupside, chestburnside, amount, slot, slot)
+	-- 		break
+	-- 	elseif stack and stack["name"] == thing and stack["size"] < amount then
+	-- 		print("Hittade " .. stack["size"] .. " " .. thing .. ". Delflyttar och fortsätter leta!")
+	-- 		chesttransposer.transferItem(chestpickupside, chestburnside, stack["size"], slot, slot)
+	-- 		amount = amount - stack["size"]
+	-- 	end
+	-- end
 
+	print(sourcechesttotals[thing])
+	print("I Source Chest finns " .. sourcechesttotals[thing] .. " av ".. thing)
+
+	if sourcechesttotals[thing] < amount then
+		print("Det finns inte nog av " .. thing  " i källkistan (enligt källkistlistan)")
+		print("Kan endast flytta " .. sourcechesttotals[thing] .. " av " .. amount)
+		sourcechesttotals.thing = 0
+	end
+
+	for pseudoslot, pseudoslotcontent in pairs(sourcechestinventory) do
+		-- print(pseudoslotcontent.name)
+		if pseudoslotcontent.name == thing and pseudoslotcontent.size > 0 then
+			print("Innan omräkning: " .. sourcechesttotals[thing])
+			print("Amount: " .. amount)
+			sourcechesttotals[thing] = sourcechesttotals[thing] - amount
+			print("Efter omräkning: " .. sourcechesttotals[thing])
+			if pseudoslotcontent.size >= amount then
+				print("Hittade " .. amount .. " av " .. thing .. ". Flyttar till burn chest.")
+				chesttransposer.transferItem(chestpickupside, chestburnside, amount, pseudoslot, pseudoslot)
+				pseudoslotcontent.size = pseudoslotcontent.size - amount
+				break
+			elseif pseudoslotcontent.size < amount then
+				print("Hittade " .. pseudoslotcontent.size .. " " .. thing .. ". Delflyttar och fortsätter leta!")
+				chesttransposer.transferItem(chestpickupside, chestburnside, amount, pseudoslot, pseudoslot)
+				pseudoslotcontent.size = 0
+			end
+		end
+	end
+	-- for pseudoslot, pseudoslotcontent in pairs(sourcechestinventory) do
+	-- 	print(pseudoslot)
+	-- 	for x, y in pairs(pseudoslotcontent) do
+	-- 		print(x)
+	-- 		print(y)
+	-- 	end
+	-- end
+end
 		-- todo: Stuff mover borde utgå från den redan indexerade källkist-listan
 		-- todo: stuff mover (alt add_aspect) kan kolla om det finns nog med material för att kunna utföra refill av jars
 		-- - som det är nu så händer ingenting, det blir inget felmeddelande, och beräkningen går igenom trots att blocken inte flyttats
-
-	end
-end
 
 
 -- function för att nollställa aspect list
@@ -111,7 +145,7 @@ local function extra_aspect(bi_aspect, bi_aspect_amount)
 	if aspectlist[sub_bi_aspect] then
 		aspectlist[sub_bi_aspect] = aspectlist[sub_bi_aspect] + sub_biaspect_added
 	elseif not aspectlist[sub_bi_aspect] then
-		print(bi_aspect .. " fanns inte definierad i subaspekterna")
+		print("Sub-bi-aspekt fanns inte definierad för " .. bi_aspect)
 	end
 
 	-- todo: output kan bli snyggare med aspekter som inte finns i aspectlist och bara notera att de finns, men inte kommer att adderas
@@ -145,15 +179,15 @@ local function add_aspect(aspect, add_amount)
 		-- vv = biaspekt
 	-- end
 	local block_value = aspect_add_data[preferred_block][aspect]
-	local no_blocks = (add_amount/essentiasmelterytype[2])/block_value
-	print("Antal block att flytta med förbränningsgrad medräknad är " .. no_blocks .. " och avrundat blir det " .. math.floor(no_blocks))
-	local add_amount_blocks = math.floor(math.floor(no_blocks) * block_value * essentiasmelterytype[2])
+	local no_blocks = math.floor(0.5+((add_amount/essentiasmelterytype[2])/block_value))
+	print("Antal block att flytta med förbränningsgrad medräknad och avrundat är " .. no_blocks)
+	local add_amount_blocks = no_blocks * block_value * essentiasmelterytype[2]
 	aspectlist[aspect] = aspectlist[aspect] + add_amount_blocks
 
-	stuff_mover(preferred_block, math.floor(no_blocks))
+	stuff_mover(preferred_block, no_blocks)
 
 	-- extraaspekterna behöver räknas innan man skickar begäran till stuff mover. 
-	-- saplings till ex har 5 victus och 15 herba, så det blir mer victus from herban än från victusen. 
+	-- saplings till ex har 5 victus och 15 herba, så det blir mer victus from herban än från victus. 
 	-- det blir oftast inte ett problem, men bara för att cognitio skapar så mycket victus, att det knappt behöver skapas för sig självt. 
 
 	for extraaspect, extraamount in pairs(secondary_aspects) do
