@@ -1,6 +1,6 @@
 
-local serp_ok, serpent = pcall(require, "serpent")
-if not serp_ok then
+local serpent_ok, serpent = pcall(require, "serpent")
+if not serpent_ok then
   print("Serpent is not available, continuing without it.")
   serpent = nil
 end
@@ -8,7 +8,7 @@ end
 -- modul för att lista innehåll i tables. Bra för debugging. Inte nödvändig för resten av scriptet.	
 local component = require("component")
 
-local ordered_aspects = {"Cognitio", "Alienis", "Ordo", "Victus", "Perditio", "Potentia", "Ignis"}
+local ordered_aspects = {"Cognitio", "Alienis", "Ordo", "Victus", "Perditio", "Potentia", "Ignis", "Lux"}
 -- ordning för hur aspekter ska brännas, med tanke på biaspekter
 local preferred_aspect_blocks = {
 	Cognitio = {"minecraft:paper"},
@@ -17,7 +17,8 @@ local preferred_aspect_blocks = {
 	Victus = {"minecraft:sapling"},
 	Perditio = {"minecraft:gunpowder"},
 	Potentia = {"minecraft:coal"},
-	Ignis = {"minecraft:coal"}
+	Ignis = {"minecraft:coal"},
+	Lux = {"minecraft:torch"}
 }
 -- föredraget block att bränna för att få aspekten
 local aspect_add_data = {}
@@ -66,7 +67,7 @@ local function stuff_mover(thing, amount)
 	print("I Source Chest finns " .. sourcechesttotals[thing] .. " av ".. thing)
 
 	if sourcechesttotals[thing] < amount then
-		print("Det finns inte nog av " .. thing  " i källkistan (enligt källkistlistan)")
+		print("Det finns inte nog av " .. thing .. " i källkistan (enligt källkistlistan)")
 		print("Kan endast flytta " .. sourcechesttotals[thing] .. " av " .. amount)
 		sourcechesttotals[thing] = 0
 	elseif sourcechesttotals[thing] >= amount then
@@ -324,6 +325,17 @@ local function printjarcontents()
 end
 
 
+local function custom()
+	print()
+	print("Custom choice mode!")
+	io.write("Vilken aspekt ska fyllas på? ")
+	local custaspect = io.read()
+	io.write("Hur mycket? ")
+	local custamount = io.read()
+	add_aspect(custaspect, custamount)
+end
+
+
 local function main()
 	jaradresses()
 	sourcechest()
@@ -337,6 +349,7 @@ Meny:
 4. Indexera source chest
 5. Byt Smelterytyp. Nuvarande: %s
 6. Debug 
+7. Custom choice
 0. Avsluta]], essentiasmelterytype[1]))
 		io.write("Välj ett alternativ: ")
 		local choice = io.read()
@@ -352,6 +365,8 @@ Meny:
 				change_smeltery_type()
 			elseif choice == "6" then
 				debug()
+			elseif choice == "7" then
+				custom()
 			elseif choice == "0" then
 				break
 			else
