@@ -1,7 +1,13 @@
 
-local serpent = require("serpent")
+local serp_ok, serpent = pcall(require, "serpent")
+if not serp_ok then
+  print("Serpent is not available, continuing without it.")
+  serpent = nil
+end
+
 -- modul för att lista innehåll i tables. Bra för debugging. Inte nödvändig för resten av scriptet.	
 local component = require("component")
+
 local ordered_aspects = {"Cognitio", "Alienis", "Ordo", "Victus", "Perditio", "Potentia", "Ignis"}
 -- ordning för hur aspekter ska brännas, med tanke på biaspekter
 local preferred_aspect_blocks = {
@@ -31,6 +37,7 @@ local chesttransposer = component.proxy("dd868d05-f35c-4b63-97b1-5e2e70998eec")
 -- det finns just nu bara en transposer, och den har den här adressen
 local chestpickupside = 3
 local chestburnside = 2
+-- todo: automatisk tilldelning av var kistorna sitter i förhållande till transposern
 local sourcechestsize = chesttransposer.getInventorySize(chestpickupside)
 -- storleken på source chest
 local essentiasmelterytype = {"Thaumic", 0.9}
@@ -62,15 +69,15 @@ local function stuff_mover(thing, amount)
 		print("Det finns inte nog av " .. thing  " i källkistan (enligt källkistlistan)")
 		print("Kan endast flytta " .. sourcechesttotals[thing] .. " av " .. amount)
 		sourcechesttotals[thing] = 0
-	end
+	elseif sourcechesttotals[thing] >= amount then
+		print("Innan omräkning: " .. sourcechesttotals[thing])
+		print("Amount: " .. amount)
+		sourcechesttotals[thing] = sourcechesttotals[thing] - amount
+		print("Efter omräkning: " .. sourcechesttotals[thing])	end
 
 	for pseudoslot, pseudoslotcontent in pairs(sourcechestinventory) do
 		-- print(pseudoslotcontent.name)
 		if pseudoslotcontent.name == thing and pseudoslotcontent.size > 0 then
-			print("Innan omräkning: " .. sourcechesttotals[thing])
-			print("Amount: " .. amount)
-			sourcechesttotals[thing] = sourcechesttotals[thing] - amount
-			print("Efter omräkning: " .. sourcechesttotals[thing])
 			if pseudoslotcontent.size >= amount then
 				print("Hittade " .. amount .. " av " .. thing .. ". Flyttar till burn chest.")
 				chesttransposer.transferItem(chestpickupside, chestburnside, amount, pseudoslot, pseudoslot)
@@ -367,7 +374,6 @@ main()
 -- Snygga till formatet för vad som skrivs på skärmen
 -- - ex så att aspectrapporterna kommer i rader som står ovanför varandra
 
--- Fixa till sourcechest så att den faktiskt inventerar i källkistan och ger någon sorts rapport av hur mkt potentiella aspects som finns
 
 -- Fixa språk så det blir tydligt vad som är potentiella aspects, och vad som redan finns i jars
 
@@ -379,26 +385,3 @@ main()
 
 -- Göra en key-value med display-motsvarigheter till minecraft-variablerna för block. Så att den skriver "Stone" istället för 
 -- minecraft:stone. 
-
-
--- Sourcechestplan:
--- Kolla igenom kistan och summera dels
--- - antalet block och typ
--- - och summera aspekter, dels hur många per blocktyp, men även totalt. 
--- Ska detta bli två olika tables? Lägga till aspekter och mängder per block i aspect_add_data och antal block i sourcechestinventory?
--- Det blir komplext hur man än vrider och vänder på det. På något sätt måste ju scriptet bestämma vilket material det ska använda. 
--- Extraaspekter (som ska gå genom centrifuges) blir också en helt egen historia. 
-
--- En egen lista med blockpreferenser för olika aspekter? På det sättet löser man beslutsproblet, och sen blir det lätt att ta de skapade aspekterna 
--- från listan som sourcechestinventory skapar. Prövar med detta. 
--- Så först sourcechestinventory som ska innehålla
--- Typ av block, antal, och även lagra aspekter för varje block - men i ett separat table? 
-
--- Jag får det till att det blir tre listor/tables
--- sourcechestinventory
--- - innehåll i kistan, typ, antal men INTE aspekter - det lagras i aspect_add_data
--- aspect_add_data
--- - potentiella aspekter för varje blocktyp
--- ordered_aspects
--- - ordningen för hur aspekter ska läggas till när jars fylls på
--- - och möjligen preferensordning för vilken blocktyp som ska användas? 
