@@ -1,5 +1,6 @@
 
 local serpent = require("serpent")
+-- modul för att lista innehåll i tables. Bra för debugging. Inte nödvändig för resten av scriptet.	
 local component = require("component")
 local ordered_aspects = {"Cognitio", "Alienis", "Ordo", "Victus", "Perditio", "Potentia", "Ignis"}
 -- ordning för hur aspekter ska brännas, med tanke på biaspekter
@@ -60,7 +61,7 @@ local function stuff_mover(thing, amount)
 	if sourcechesttotals[thing] < amount then
 		print("Det finns inte nog av " .. thing  " i källkistan (enligt källkistlistan)")
 		print("Kan endast flytta " .. sourcechesttotals[thing] .. " av " .. amount)
-		sourcechesttotals.thing = 0
+		sourcechesttotals[thing] = 0
 	end
 
 	for pseudoslot, pseudoslotcontent in pairs(sourcechestinventory) do
@@ -78,6 +79,7 @@ local function stuff_mover(thing, amount)
 			elseif pseudoslotcontent.size < amount then
 				print("Hittade " .. pseudoslotcontent.size .. " " .. thing .. ". Delflyttar och fortsätter leta!")
 				chesttransposer.transferItem(chestpickupside, chestburnside, amount, pseudoslot, pseudoslot)
+				amount = amount - pseudoslotcontent.size
 				pseudoslotcontent.size = 0
 			end
 		end
@@ -93,7 +95,7 @@ end
 		-- todo: Stuff mover borde utgå från den redan indexerade källkist-listan
 		-- todo: stuff mover (alt add_aspect) kan kolla om det finns nog med material för att kunna utföra refill av jars
 		-- - som det är nu så händer ingenting, det blir inget felmeddelande, och beräkningen går igenom trots att blocken inte flyttats
-
+		-- - todo: en return med info om vad som faktiskt blev flyttat?
 
 -- function för att nollställa aspect list
 local function reset_aspects()
@@ -136,6 +138,9 @@ local function extra_aspect(bi_aspect, bi_aspect_amount)
 		sub_bi_aspect = "Victus"
 	end
 	print("Extraaspektfunktionen har blivit varse om " .. bi_aspect_amount .. " " .. bi_aspect)
+	if sub_bi_aspect == bi_aspect then
+		print("Extraaspekten är samma som den önskade aspekten! Räknar om baserat på detta.")
+	end
 	-- print("Centrifugerat blir det: " .. sub_bi_aspect)
 	-- print("Lägger till mängden " .. bi_aspect_amount .. " multiplicerat med hälften och effekivitetskoefficient.")
 	-- print(bi_aspect_amount .. " * " .. essentiasmelterytype[2] .. " * " .. "0.5")
@@ -184,11 +189,6 @@ local function add_aspect(aspect, add_amount)
 	local add_amount_blocks = no_blocks * block_value * essentiasmelterytype[2]
 	aspectlist[aspect] = aspectlist[aspect] + add_amount_blocks
 
-	stuff_mover(preferred_block, no_blocks)
-
-	-- extraaspekterna behöver räknas innan man skickar begäran till stuff mover. 
-	-- saplings till ex har 5 victus och 15 herba, så det blir mer victus from herban än från victus. 
-	-- det blir oftast inte ett problem, men bara för att cognitio skapar så mycket victus, att det knappt behöver skapas för sig självt. 
 
 	for extraaspect, extraamount in pairs(secondary_aspects) do
 		-- print("Extraaspekt till biaspektfunktionen: " .. extraaspect)
@@ -197,6 +197,15 @@ local function add_aspect(aspect, add_amount)
 		-- print("Total mängd utan effektivitet eller halvering: ".. totalextraamount)
 		extra_aspect(extraaspect, totalextraamount)
 	end
+
+
+	stuff_mover(preferred_block, no_blocks)
+
+	-- extraaspekterna behöver räknas innan man skickar begäran till stuff mover. 
+	-- saplings till ex har 5 victus och 15 herba, så det blir mer victus from herban än från victus. 
+	-- det blir oftast inte ett problem, men bara för att cognitio skapar så mycket victus, att det knappt behöver skapas för sig självt. 
+
+
 end
 
 
