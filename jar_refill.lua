@@ -330,10 +330,24 @@ end
 local function custom()
 	print()
 	print("Custom choice mode!")
-	io.write("Vilken aspekt ska fyllas på? ")
-	local custaspect = io.read()
+	local custaspect
+	while true do
+		io.write("Vilken aspekt ska fyllas på? ")
+		local input = io.read()
+
+		for _, aspect in ipairs(ordered_aspects) do
+			if input == aspect then
+				custaspect = input
+				goto valid_aspect -- jump out of the loop once found
+			end
+		end
+		print("Det finns ingen sån aspekt. Försök igen.")
+	end
+
+	::valid_aspect::
+
 	io.write("Hur mycket? ")
-	local custamount = io.read()
+	local custamount = tonumber(io.read())
 	add_aspect(custaspect, custamount)
 end
 
@@ -402,3 +416,6 @@ main()
 
 -- Göra en key-value med display-motsvarigheter till minecraft-variablerna för block. Så att den skriver "Stone" istället för 
 -- minecraft:stone. 
+
+-- Göra fler adapters, så alla jars blir indexerade. Få scriptet att hålla koll på hur många jars varje aspekt har, och fylla på efter det. 
+-- - Kan bli problem då tomma jars inte får en aspekt tilldelad, det skulle man kunna bli tillfrågad om och konfigurera manuellt. Den senaste konfigen skulle också kunna sparas. 
