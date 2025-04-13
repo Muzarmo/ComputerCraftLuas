@@ -41,7 +41,7 @@ local chestburnside = 2
 -- todo: automatisk tilldelning av var kistorna sitter i förhållande till transposern
 local sourcechestsize = chesttransposer.getInventorySize(chestpickupside)
 -- storleken på source chest
-local essentiasmelterytype = {"Thaumic", 0.9}
+local essentiasmelterytype = {"Void", 0.95}
 
 
 -- flyttar saker från source chest till burn chest
@@ -115,9 +115,11 @@ end
 -- function för att byta smelterytyp
 local function change_smeltery_type()
 	if essentiasmelterytype[1] == "Thaumic" then
-		essentiasmelterytype = {"Base", 0.8}
+		essentiasmelterytype = {"Void", 0.95}
 	elseif essentiasmelterytype[1] == "Base" then
 		essentiasmelterytype = {"Thaumic", 0.9}
+	elseif essentiasmelterytype[1] == "Void" then
+		essentiasmelterytype = {"Base", 0.8}
 	end
 end
 
@@ -201,7 +203,7 @@ local function add_aspect(aspect, add_amount)
 	for extraaspect, extraamount in pairs(secondary_aspects) do
 		-- print("Extraaspekt till biaspektfunktionen: " .. extraaspect)
 		-- print("Och såhär många (per block): " .. extraamount)
-		local totalextraamount = extraamount*(math.floor(no_blocks))
+		local totalextraamount = extraamount*no_blocks
 		-- print("Total mängd utan effektivitet eller halvering: ".. totalextraamount)
 		extra_aspect(extraaspect, totalextraamount)
 	end
@@ -344,9 +346,9 @@ local function main()
 		
 Meny: 
 1. Samla adresser / indexera jars
-2. Visa innehåll i aspectlist
+2. Indexera source chest
 3. Fyll på jars
-4. Indexera source chest
+4. Visa innehåll i aspectlist
 5. Byt Smelterytyp. Nuvarande: %s
 6. Debug 
 7. Custom choice
@@ -356,11 +358,11 @@ Meny:
 			if choice == "1" then
 				jaradresses()
 			elseif choice == "2" then
-				printjarcontents()
+				sourcechest()
 			elseif choice == "3" then
 				refilljars()
 			elseif choice == "4" then
-				sourcechest()
+				printjarcontents()
 			elseif choice == "5" then
 				change_smeltery_type()
 			elseif choice == "6" then
