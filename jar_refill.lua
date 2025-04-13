@@ -34,13 +34,11 @@ local checkedcontents = false
 local void_jars = {}
 local normal_jars = {}
 local complist = component.list()
-local chesttransposer = component.proxy("dd868d05-f35c-4b63-97b1-5e2e70998eec")
--- det finns just nu bara en transposer, och den har den här adressen
+local chesttransposer
+local sourcechestsize
 local chestpickupside = 3
 local chestburnside = 2
 -- todo: automatisk tilldelning av var kistorna sitter i förhållande till transposern
-local sourcechestsize = chesttransposer.getInventorySize(chestpickupside)
--- storleken på source chest
 local essentiasmelterytype = {"Void", 0.95}
 
 
@@ -223,9 +221,17 @@ end
 local function debug()
 	print()
 	add_aspect("Potentia", 17)
+end
 
 
-
+local function transposeradresses()
+	for compadress, comptype in complist do
+		if comptype == "transposer" then
+			chesttransposer = component.proxy(compadress)
+		end
+	end
+	sourcechestsize = chesttransposer.getInventorySize(chestpickupside)
+	-- storleken på source chest
 end
 
 
@@ -354,6 +360,7 @@ end
 
 local function main()
 	jaradresses()
+	transposeradresses()
 	sourcechest()
 	while true do
 		print(string.format([[
