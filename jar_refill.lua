@@ -309,9 +309,15 @@ end
 local function refilljars()
 	jaradresses()
 	for _, aspect in ipairs(ordered_aspects) do
-		if aspectlist[aspect] < 200 then
-			print(aspect .. " är under 200!")
+		if aspect == "Lux" then
+			if aspectlist[aspect] < 200 then
+				print(aspect .. " är under 200!")
 			local add_amount = 240 - aspectlist[aspect]
+			add_aspect(aspect, add_amount)
+			end
+		elseif aspectlist[aspect] < 500 then
+			print(aspect .. " är under 500!")
+			local add_amount = 500 - aspectlist[aspect]
 			add_aspect(aspect, add_amount)
 		end
 	end
@@ -426,3 +432,8 @@ main()
 
 -- Göra fler adapters, så alla jars blir indexerade. Få scriptet att hålla koll på hur många jars varje aspekt har, och fylla på efter det. 
 -- - Kan bli problem då tomma jars inte får en aspekt tilldelad, det skulle man kunna bli tillfrågad om och konfigurera manuellt. Den senaste konfigen skulle också kunna sparas. 
+
+-- Assigna jar för jar och definiera max aspekt (dvs två jars = 500). Om noll i en jar ev definiera manuellt. Kanske också spara jars i en fil och omdefiniera bara på kommando?
+
+-- Robots för att ta bort full Vitium och ställa ny tom jar? 
+-- - Också robots för att byta kloggade lattices? 
