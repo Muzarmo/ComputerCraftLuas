@@ -35,11 +35,13 @@ local void_jars = {}
 local normal_jars = {}
 local complist = component.list()
 local chesttransposer
+local dioptra
 local sourcechestsize
 local chestpickupside = 3
 local chestburnside = 2
 -- todo: automatisk tilldelning av var kistorna sitter i förhållande till transposern
 local essentiasmelterytype = {"Void", 0.95}
+local automodebool = true
 
 
 -- flyttar saker från source chest till burn chest
@@ -224,10 +226,12 @@ local function debug()
 end
 
 
-local function transposeradresses()
+local function othercomponentadresses()
 	for compadress, comptype in complist do
 		if comptype == "transposer" then
 			chesttransposer = component.proxy(compadress)
+		elseif comptype == "dioptra" then
+			dioptra = component.proxy(compadress)
 		end
 	end
 	sourcechestsize = chesttransposer.getInventorySize(chestpickupside)
@@ -364,37 +368,81 @@ local function custom()
 end
 
 
+local function spinner(spinnseconds)
+	local symbols = { "|", "/", "-", "\\"}
+	local interval = 0.1
+	local steps = math.floor(spinnseconds / interval)
+
+	for i = 1, steps do
+		local symbol = symbols[i % #symbols + 1]
+		io.write("\r" .. symbol .. " Waiting... ")
+		io.flush()
+		os.sleep(interval)
+	end
+	io.write("\r")
+	-- io.write("\r Done!      \n")
+end
+
+
+local function waitForLowFlux(threshold)
+	while true do
+		local flux = dioptra.getFlux()
+		if flux < threshold then break end
+		local fluxform = string.format("%.1f", flux)
+		print("Flux är för högt - " .. fluxform .. ", väntar 30s.. ")
+		spinner(30)
+	end
+end
+
+
+local function automode()
+	while automodebool do
+		print("Auto mode! Ctrl-Alt-C för att avsluta.")
+		waitForLowFlux(100)
+		jaradresses()
+		sourcechest()
+		refilljars()
+		print("Jars refilled!")
+		print("Väntar 5 min mellan cykler")
+		spinner(300)
+	end
+end
+
+
 local function main()
 	jaradresses()
-	transposeradresses()
+	othercomponentadresses()
 	sourcechest()
 	while true do
 		print(string.format([[
 		
 Meny: 
-1. Samla adresser / indexera jars
-2. Indexera source chest
-3. Fyll på jars
-4. Visa innehåll i aspectlist
-5. Byt Smelterytyp. Nuvarande: %s
-6. Debug 
-7. Custom choice
+1. Auto Mode
+2. Samla adresser / indexera jars
+3. Indexera source chest
+4. Fyll på jars
+5. Visa innehåll i aspectlist
+6. Byt Smelterytyp. Nuvarande: %s
+7. Debug 
+8. Custom choice
 0. Avsluta]], essentiasmelterytype[1]))
 		io.write("Välj ett alternativ: ")
 		local choice = io.read()
 			if choice == "1" then
-				jaradresses()
+				automode()
 			elseif choice == "2" then
-				sourcechest()
+				jaradresses()
 			elseif choice == "3" then
-				refilljars()
+				sourcechest()
 			elseif choice == "4" then
-				printjarcontents()
+				refilljars()
 			elseif choice == "5" then
-				change_smeltery_type()
+				printjarcontents()
 			elseif choice == "6" then
-				debug()
+				change_smeltery_type()
 			elseif choice == "7" then
+				debug()
+			elseif choice == "8" then
 				custom()
 			elseif choice == "0" then
 				break
