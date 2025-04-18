@@ -63,18 +63,19 @@ local function stuff_mover(thing, amount)
 	-- 	end
 	-- end
 
-	print(sourcechesttotals[thing])
-	print("I Source Chest finns " .. sourcechesttotals[thing] .. " av ".. thing)
+	-- print(sourcechesttotals[thing])
+	print(string.format("I Source Chest finns %d av %s, flyttar %d och %d blir kvar", sourcechesttotals[thing], thing, amount, (sourcechesttotals[thing]-amount)))
 
 	if sourcechesttotals[thing] < amount then
 		print("Det finns inte nog av " .. thing .. " i källkistan (enligt källkistlistan)")
 		print("Kan endast flytta " .. sourcechesttotals[thing] .. " av " .. amount)
 		sourcechesttotals[thing] = 0
 	elseif sourcechesttotals[thing] >= amount then
-		print("Innan omräkning: " .. sourcechesttotals[thing])
-		print("Amount: " .. amount)
+		-- print("Innan omräkning: " .. sourcechesttotals[thing])
+		-- print("Amount: " .. amount)
 		sourcechesttotals[thing] = sourcechesttotals[thing] - amount
-		print("Efter omräkning: " .. sourcechesttotals[thing])	end
+		-- print("Efter omräkning: " .. sourcechesttotals[thing])	
+		end
 
 	for pseudoslot, pseudoslotcontent in pairs(sourcechestinventory) do
 		-- print(pseudoslotcontent.name)
@@ -170,6 +171,7 @@ end
 
 -- funktion för att lägga till aspekter
 local function add_aspect(aspect, add_amount)
+	print()
 	print("Add-aspect function har blivit tillsagd att lägga till " .. add_amount .. " till " .. aspect)
 	local preferred_block = preferred_aspect_blocks[aspect][1]
 	print("Preferred block: " .. preferred_block)
@@ -208,8 +210,12 @@ local function add_aspect(aspect, add_amount)
 		extra_aspect(extraaspect, totalextraamount)
 	end
 
+	if no_blocks > 0 then
+		stuff_mover(preferred_block, no_blocks)
+	else
+		print("Inga block att flytta, kallar inte Stuff Mover")
+	end
 
-	stuff_mover(preferred_block, no_blocks)
 
 	-- extraaspekterna behöver räknas innan man skickar begäran till stuff mover. 
 	-- saplings till ex har 5 victus och 15 herba, så det blir mer victus from herban än från victus. 
@@ -398,8 +404,7 @@ end
 local function automode()
 	while automodebool do
 		print("Auto mode! Ctrl-Alt-C för att avsluta.")
-		waitForLowFlux(100)
-		jaradresses()
+		waitForLowFlux(50)
 		sourcechest()
 		refilljars()
 		print("Jars refilled!")
@@ -485,3 +490,5 @@ main()
 
 -- Robots för att ta bort full Vitium och ställa ny tom jar? 
 -- - Också robots för att byta kloggade lattices? 
+
+-- Se till så det går att använda thermal foundation-metaller, trots att dom verkar vara namngivna efter ett meta-värde 
